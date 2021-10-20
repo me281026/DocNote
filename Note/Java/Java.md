@@ -1479,6 +1479,126 @@ CMS（-XX:+UseConcMarkSweepGC）
 
 G1 收集器
 
+### 3.9.JVM常量池
+
+JVM常量池也称之为运行时常量池，它是方法区（Method Area）的一部分。用于存放编译期间生成的各种字面量和符号引用。运行时常量池不要求一定只有在编译器产生的才能进入，运行期间也可以将新的常量放入池中，这种特性被开发人员利用比较多的就是String.intern()方法。
+
+由“用于存放编译期间生成的各种字面量和符号引用”这句话可见，常量池中存储的是对象的引用而不是对象的本身。
+
+常量池的好处常量池是为了避免频繁的创建和销毁对象而影响系统性能，它也实现了对象的共享。
+例如字符串常量池：在编译阶段就把所有字符串文字放到一个常量池中。
+
+1. 节省内存空间：常量池中如果有对应的字符串，那么则返回该对象的引用，从而不必再次创建一个新对象。
+2. 节省运行时间：比较字符串时，==比equals()快。对于两个引用变量，==判断引用是否相等，也就可以判断实际值是否相等。
+
+双等号（==）的含义
+
+基本数据类型之间使用双等号，比较的是数值。
+
+复合数据类型（类）之间使用双等号，比较的是对象的引用地址是否相等。
+
+**八种基本类型的包装类和常量池:**
+
+Byte、Short、Integer、Long、Character、Boolean、String这7种包装类都各自实现了自己的常量池。
+
+```java
+
+//例子：
+Integer i1 = 20;
+Integer i2 = 20;
+System.out.println(i1=i2);//输出TRUE
+
+```
+
+Byte、Short、Integer、Long、Character这5种包装类都默认创建了数值[-128 , 127]的缓存数据。当对这5个类型的数据不在这个区间内的时候，将会去创建新的对象，并且不会将这些新的对象放入常量池中。
+
+```java
+
+//IntegerCache.low = -128
+//IntegerCache.high = 127
+public static Integer valueOf(int i) {
+        if (i >= IntegerCache.low && i <= IntegerCache.high)
+            return IntegerCache.cache[i + (-IntegerCache.low)];
+        return new Integer(i);
+    }
+
+    //例子
+    Integer i1 = 200;
+    Integer i2 = 200;
+    System.out.println(i1==i2);//返回FALSE
+```
+
+**Float 和Double 没有实现常量池。**
+
+String包装类与常量池
+
+```java
+String str1 = "aaa";
+
+String str1 = "aaa";
+String str2 = "aaa";
+System.out.println(str1 == str2);//返回TRUE
+
+String str3 = new String("aaa");
+System.out.println(str1 == str3);//返回FALSE
+```
+
+当以上代码运行时，JVM会到字符串常量池查找 "aaa" 这个字面量对象是否存在？
+
+存在：则返回该对象的引用给变量 str1 。
+
+不存在：则在堆中创建一个相应的对象，将创建的对象的引用存放到常量池中，同时将引用返回给变量 str1 。
+
+因为变量str1 和str2 都指向同一个对象，所以返回true。
+
+当我们使用了new来构造字符串对象的时候，不管字符串常量池中是否有相同内容的对象的引用，新的字符串对象都会创建。因为两个指向的是不同的对象，所以返回FALSE 。
+
+**String.intern()方法:**
+
+对于使用了new 创建的字符串对象，如果想要将这个对象引用到字符串常量池，可以使用intern() 方法。
+
+调用intern() 方法后，检查字符串常量池中是否有这个对象的引用，并做如下操作：
+
+存在：直接返回对象引用给变量。
+
+不存在：将这个对象引用加入到常量池，再返回对象引用给变量。
+
+```java
+String interns = str3.intern();
+System.out.println(interns == str1);//返回TRUE
+```
+
+假定常量池中都没有以上字面量的对象，以下创建了多少个对象呢？
+
+```java
+
+String str4 = "abc"+"efg";
+String str5 = "abcefg";
+System.out.println(str4 == str5);//返回TRUE
+
+```
+
+答案是三个。第一个："abc" ，第一个："efg"，第三个："abc"+"efg"（"abcefg"）String str5 = "abcefg";
+
+这句代码并没有创建对象，它从常量池中找到了"abcefg" 的引用，所有str4 == str5 返回TRUE，因为它们都指向一个相同的对象。
+
+**什么情况下会将字符串对象引用自动加入字符串常量池？**
+
+```java
+
+//只有在这两种情况下会将对象引用自动加入到常量池
+String str1 = "aaa";
+String str2 = "aa"+"a";
+
+//其他方式下都不会将对象引用自动加入到常量池，如下：
+String str3 = new String("aaa");
+String str4 = New StringBuilder("aa").append("a").toString();
+StringBuilder sb = New StringBuilder();
+sb.append("aa");
+sb.append("a");
+String str5 = sb.toString();
+```
+
 ## 4.分布式锁
 
 ## 5.ORM实现
