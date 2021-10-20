@@ -917,7 +917,7 @@ WARN 表示不存在时找一个替代 、ERROR 表示不存在抛出异常
 
 #### 3.4.4.运行Java程序
 
-JVM运行Java程序的方式有两种：jar包 与 Class运行jar 的时候，Java.exe调用GetMainClassName函数，该函数先获得JNIEnv实例然后调用JarFileJNIEnv类中getManifest()，从其返回的Manifest对象中取getAttrebutes("Main-Class")的值，即jar 
+JVM运行Java程序的方式有两种：jar包 与 Class运行jar 的时候，Java.exe调用GetMainClassName函数，该函数先获得JNIEnv实例然后调用JarFileJNIEnv类中getManifest()，从其返回的Manifest对象中取getAttrebutes("Main-Class")的值，即jar
 
 包中文件：META-INF/MANIFEST.MF指定的Main-Class的主类名作为运行的主类。
 
@@ -1402,7 +1402,6 @@ ParallelScavenge又被称为吞吐量优先收集器，和ParNew 收集器类似
 ParallelScavenge收集器的目标是达到一个可控件的吞吐量，所谓吞吐量就是CPU用于运行用户代码的时间与CPU总消耗时间的比值，即吞吐量 = 运行用户代码时间 / （运行用户代码时间 + 垃圾收集时间）。如果虚拟机总共运行了100分钟，其中垃圾收集花了1分钟，那么吞吐量就是99% 。
 
 **5、ParallelOld（-XX:+UseParallelOldGC）:**
-
 
 ParallelOld是并行收集器，和SerialOld一样，ParallelOld是一个老年代收集器，是老年代吞吐量优先的一个收集器。这个收集器在JDK1.6之后才开始提供的，在此之前，ParallelScavenge只能选择SerialOld来作为其老年代的收集器，这严重拖累了ParallelScavenge整体的速度。而ParallelOld的出现后，“吞吐量优先”收集器才名副其实！
 
