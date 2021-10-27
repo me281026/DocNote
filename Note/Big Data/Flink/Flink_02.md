@@ -168,7 +168,7 @@ public class StreamWordCount {
         // 创建流处理执行环境
         StreamExecutionEnvironment env = StreamContextEnvironment.getExecutionEnvironment();
 
-      	// 设置并行度，默认值 = 当前计算机的CPU逻辑核数（设置成1即单线程处理）
+       // 设置并行度，默认值 = 当前计算机的CPU逻辑核数（设置成1即单线程处理）
         // env.setMaxParallelism(32);
       
         // 从文件中读取数据
@@ -211,7 +211,7 @@ public class StreamWordCount {
 5> (hello,4)
 ```
 
-​	这里`env.execute();`之前的代码，可以理解为是在定义任务，只有执行`env.execute()`后，Flink才把前面的代码片段当作一个任务整体（每个线程根据这个任务操作，并行处理流数据）。
+​ 这里`env.execute();`之前的代码，可以理解为是在定义任务，只有执行`env.execute()`后，Flink才把前面的代码片段当作一个任务整体（每个线程根据这个任务操作，并行处理流数据）。
 
 ## 2.3 流式数据源测试
 
@@ -268,13 +268,13 @@ public class StreamWordCount {
 
 3. 在本地开启的socket中输入数据，观察IDEA的console输出。
 
-   ​	本人测试后发现，同一个字符串，前面输出的编号是一样的，因为key => hashcode,同一个key的hash值固定，分配给相对应的线程处理。
+   ​ 本人测试后发现，同一个字符串，前面输出的编号是一样的，因为key => hashcode,同一个key的hash值固定，分配给相对应的线程处理。
 
 # 3. Flink部署
 
 ## 3.1 Standalone模式
 
-> [Flink任务调度原理之TaskManager 与Slots](https://blog.csdn.net/qq_39657909/article/details/105823127)	<=	下面内容出自该博文
+> [Flink任务调度原理之TaskManager 与Slots](https://blog.csdn.net/qq_39657909/article/details/105823127) <= 下面内容出自该博文
 
 1. Flink 中每一个 TaskManager 都是一个JVM进程，它可能会在独立的线程上执行一个或多个 subtask
 2. 为了控制一个 TaskManager 能接收多少个 task， TaskManager 通过 task slot 来进行控制（一个 TaskManager 至少有一个 slot）
@@ -403,27 +403,27 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ## 3.2 yarn模式
 
-> [4.6 Flink-流处理框架-Flink On Yarn（Session-cluster+Per-Job-Cluster）](https://blog.csdn.net/suyebiubiu/article/details/111874245)	<=	下面内容出自此处，主要方便索引图片URL
+> [4.6 Flink-流处理框架-Flink On Yarn（Session-cluster+Per-Job-Cluster）](https://blog.csdn.net/suyebiubiu/article/details/111874245) <= 下面内容出自此处，主要方便索引图片URL
 
- 	以Yarn模式部署Flink任务时，要求Flink是有 Hadoop 支持的版本，Hadoop 环境需要保证版本在 2.2 以上，并且集群中安装有 HDFS 服务。
+  以Yarn模式部署Flink任务时，要求Flink是有 Hadoop 支持的版本，Hadoop 环境需要保证版本在 2.2 以上，并且集群中安装有 HDFS 服务。
 
 ### 3.2.1 Flink on Yarn
 
-​	Flink提供了两种在yarn上运行的模式，分别为Session-Cluster和Per-Job-Cluster模式。
+​ Flink提供了两种在yarn上运行的模式，分别为Session-Cluster和Per-Job-Cluster模式。
 
 #### 1. Sesstion Cluster模式
 
-​	Session-Cluster 模式需要先启动集群，然后再提交作业，接着会向 yarn 申请一块空间后，**资源永远保持不变**。如果资源满了，下一个作业就无法提交，只能等到 yarn 中的其中一个作业执行完成后，释放了资源，下个作业才会正常提交。**所有作业共享 Dispatcher 和 ResourceManager**；**共享资源；适合规模小执行时间短的作业。**
+​ Session-Cluster 模式需要先启动集群，然后再提交作业，接着会向 yarn 申请一块空间后，**资源永远保持不变**。如果资源满了，下一个作业就无法提交，只能等到 yarn 中的其中一个作业执行完成后，释放了资源，下个作业才会正常提交。**所有作业共享 Dispatcher 和 ResourceManager**；**共享资源；适合规模小执行时间短的作业。**
 
 ![img](https://img-blog.csdnimg.cn/20201228202616146.png)
 
-​	**在 yarn 中初始化一个 flink 集群，开辟指定的资源，以后提交任务都向这里提交。这个 flink 集群会常驻在 yarn 集群中，除非手工停止。**
+​ **在 yarn 中初始化一个 flink 集群，开辟指定的资源，以后提交任务都向这里提交。这个 flink 集群会常驻在 yarn 集群中，除非手工停止。**
 
 #### 2. Per Job Cluster 模式
 
-​	一个 Job 会对应一个集群，每提交一个作业会根据自身的情况，都会单独向 yarn 申请资源，直到作业执行完成，一个作业的失败与否并不会影响下一个作业的正常提交和运行。**独享 Dispatcher 和 ResourceManager**，按需接受资源申请；适合规模大长时间运行的作业。
+​ 一个 Job 会对应一个集群，每提交一个作业会根据自身的情况，都会单独向 yarn 申请资源，直到作业执行完成，一个作业的失败与否并不会影响下一个作业的正常提交和运行。**独享 Dispatcher 和 ResourceManager**，按需接受资源申请；适合规模大长时间运行的作业。
 
-​	**每次提交都会创建一个新的 flink 集群，任务之间互相独立，互不影响，方便管理。任务执行完成之后创建的集群也会消失。**
+​ **每次提交都会创建一个新的 flink 集群，任务之间互相独立，互不影响，方便管理。任务执行完成之后创建的集群也会消失。**
 
 ![img](https://img-blog.csdnimg.cn/20201228202718916.png)
 
@@ -479,13 +479,13 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ## 3.3 Kubernetes部署
 
-​	容器化部署时目前业界很流行的一项技术，基于Docker镜像运行能够让用户更加方便地对应用进行管理和运维。容器管理工具中最为流行的就是Kubernetes（k8s），而Flink也在最近的版本中支持了k8s部署模式。
+​ 容器化部署时目前业界很流行的一项技术，基于Docker镜像运行能够让用户更加方便地对应用进行管理和运维。容器管理工具中最为流行的就是Kubernetes（k8s），而Flink也在最近的版本中支持了k8s部署模式。
 
 1. 搭建*Kubernetes*集群（略）
 
 2. 配置各组件的*yaml*文件
 
-​	在k8s上构建Flink Session Cluster，需要将Flink集群的组件对应的docker镜像分别在k8s上启动，包括JobManager、TaskManager、JobManagerService三个镜像服务。每个镜像服务都可以从中央镜像仓库中获取。
+​ 在k8s上构建Flink Session Cluster，需要将Flink集群的组件对应的docker镜像分别在k8s上启动，包括JobManager、TaskManager、JobManagerService三个镜像服务。每个镜像服务都可以从中央镜像仓库中获取。
 
 3. 启动*Flink Session Cluster*
 
@@ -510,70 +510,70 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ## 4.1 Flink运行时的组件
 
-​	Flink运行时架构主要包括四个不同的组件，它们会在运行流处理应用程序时协同工作：
+​ Flink运行时架构主要包括四个不同的组件，它们会在运行流处理应用程序时协同工作：
 
 + **作业管理器（JobManager）**
 + **资源管理器（ResourceManager）**
 + **任务管理器（TaskManager）**
 + **分发器（Dispatcher）**
 
-​	因为Flink是用Java和Scala实现的，所以所有组件都会运行在Java虚拟机上。每个组件的职责如下：
+​ 因为Flink是用Java和Scala实现的，所以所有组件都会运行在Java虚拟机上。每个组件的职责如下：
 
 ### 作业管理器（JobManager）
 
-​	控制一个应用程序执行的主进程，也就是说，每个应用程序都会被一个不同的JobManager所控制执行。
+​ 控制一个应用程序执行的主进程，也就是说，每个应用程序都会被一个不同的JobManager所控制执行。
 
-​	JobManager会先接收到要执行的应用程序，这个应用程序会包括：
+​ JobManager会先接收到要执行的应用程序，这个应用程序会包括：
 
 + 作业图（JobGraph）
 + 逻辑数据流图（logical dataflow graph）
 + 打包了所有的类、库和其它资源的JAR包。
 
-​	JobManager会把JobGraph转换成一个物理层面的数据流图，这个图被叫做“执行图”（ExecutionGraph），包含了所有可以并发执行的任务。
+​ JobManager会把JobGraph转换成一个物理层面的数据流图，这个图被叫做“执行图”（ExecutionGraph），包含了所有可以并发执行的任务。
 
-​	**JobManager会向资源管理器（ResourceManager）请求执行任务必要的资源，也就是任务管理器（TaskManager）上的插槽（slot）。一旦它获取到了足够的资源，就会将执行图分发到真正运行它们的TaskManager上**。
+​ **JobManager会向资源管理器（ResourceManager）请求执行任务必要的资源，也就是任务管理器（TaskManager）上的插槽（slot）。一旦它获取到了足够的资源，就会将执行图分发到真正运行它们的TaskManager上**。
 
-​	在运行过程中，JobManager会负责所有需要中央协调的操作，比如说检查点（checkpoints）的协调。
+​ 在运行过程中，JobManager会负责所有需要中央协调的操作，比如说检查点（checkpoints）的协调。
 
 ### 资源管理器（ResourceManager）
 
-​	主要负责管理任务管理器（TaskManager）的插槽（slot），TaskManger插槽是Flink中定义的处理资源单元。
+​ 主要负责管理任务管理器（TaskManager）的插槽（slot），TaskManger插槽是Flink中定义的处理资源单元。
 
-​	Flink为不同的环境和资源管理工具提供了不同资源管理器，比如YARN、Mesos、K8s，以及standalone部署。
+​ Flink为不同的环境和资源管理工具提供了不同资源管理器，比如YARN、Mesos、K8s，以及standalone部署。
 
-​	**当JobManager申请插槽资源时，ResourceManager会将有空闲插槽的TaskManager分配给JobManager**。如果ResourceManager没有足够的插槽来满足JobManager的请求，它还可以向资源提供平台发起会话，以提供启动TaskManager进程的容器。
+​ **当JobManager申请插槽资源时，ResourceManager会将有空闲插槽的TaskManager分配给JobManager**。如果ResourceManager没有足够的插槽来满足JobManager的请求，它还可以向资源提供平台发起会话，以提供启动TaskManager进程的容器。
 
-​	另外，**ResourceManager还负责终止空闲的TaskManager，释放计算资源**。
+​ 另外，**ResourceManager还负责终止空闲的TaskManager，释放计算资源**。
 
 ### 任务管理器（TaskManager）
 
-​	Flink中的工作进程。通常在Flink中会有多个TaskManager运行，每一个TaskManager都包含了一定数量的插槽（slots）。**插槽的数量限制了TaskManager能够执行的任务数量**。
+​ Flink中的工作进程。通常在Flink中会有多个TaskManager运行，每一个TaskManager都包含了一定数量的插槽（slots）。**插槽的数量限制了TaskManager能够执行的任务数量**。
 
-​	启动之后，TaskManager会向资源管理器注册它的插槽；收到资源管理器的指令后，TaskManager就会将一个或者多个插槽提供给JobManager调用。JobManager就可以向插槽分配任务（tasks）来执行了。
+​ 启动之后，TaskManager会向资源管理器注册它的插槽；收到资源管理器的指令后，TaskManager就会将一个或者多个插槽提供给JobManager调用。JobManager就可以向插槽分配任务（tasks）来执行了。
 
-​	**在执行过程中，一个TaskManager可以跟其它运行同一应用程序的TaskManager交换数据**。
+​ **在执行过程中，一个TaskManager可以跟其它运行同一应用程序的TaskManager交换数据**。
 
 ### 分发器（Dispatcher）
 
-​	可以跨作业运行，它为应用提交提供了REST接口。
+​ 可以跨作业运行，它为应用提交提供了REST接口。
 
-​	当一个应用被提交执行时，分发器就会启动并将应用移交给一个JobManager。由于是REST接口，所以Dispatcher可以作为集群的一个HTTP接入点，这样就能够不受防火墙阻挡。Dispatcher也会启动一个Web UI，用来方便地展示和监控作业执行的信息。
+​ 当一个应用被提交执行时，分发器就会启动并将应用移交给一个JobManager。由于是REST接口，所以Dispatcher可以作为集群的一个HTTP接入点，这样就能够不受防火墙阻挡。Dispatcher也会启动一个Web UI，用来方便地展示和监控作业执行的信息。
 
-​	*Dispatcher在架构中可能并不是必需的，这取决于应用提交运行的方式。*
+​ *Dispatcher在架构中可能并不是必需的，这取决于应用提交运行的方式。*
 
 ## 4.2 任务提交流程
 
-​	我们来看看当一个应用提交执行时，Flink的各个组件是如何交互协作的：
+​ 我们来看看当一个应用提交执行时，Flink的各个组件是如何交互协作的：
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200524212126844.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-​	*ps：上图中7.指TaskManager为JobManager提供slots，8.表示JobManager提交要在slots中执行的任务给TaskManager。*
+​ *ps：上图中7.指TaskManager为JobManager提供slots，8.表示JobManager提交要在slots中执行的任务给TaskManager。*
 
-​	上图是从一个较为高层级的视角来看应用中各组件的交互协作。
+​ 上图是从一个较为高层级的视角来看应用中各组件的交互协作。
 
-​	如果部署的集群环境不同（例如YARN，Mesos，Kubernetes，standalone等），其中一些步骤可以被省略，或是有些组件会运行在同一个JVM进程中。
+​ 如果部署的集群环境不同（例如YARN，Mesos，Kubernetes，standalone等），其中一些步骤可以被省略，或是有些组件会运行在同一个JVM进程中。
 
-​	具体地，如果我们将Flink集群部署到YARN上，那么就会有如下的提交流程：
+​ 具体地，如果我们将Flink集群部署到YARN上，那么就会有如下的提交流程：
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200524212247873.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
@@ -634,11 +634,11 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
   *而并行度**parallelism**是动态概念，即**TaskManager**运行程序时实际使用的并发能力，可以通过参数`parallelism.default`进行配置。*
 
-​	每个task slot表示TaskManager拥有资源的一个固定大小的子集。假如一个TaskManager有三个slot，那么它会将其管理的内存分成三份给各个slot。资源slot化意味着一个subtask将不需要跟来自其他job的subtask竞争被管理的内存，取而代之的是它将拥有一定数量的内存储备。
+​ 每个task slot表示TaskManager拥有资源的一个固定大小的子集。假如一个TaskManager有三个slot，那么它会将其管理的内存分成三份给各个slot。资源slot化意味着一个subtask将不需要跟来自其他job的subtask竞争被管理的内存，取而代之的是它将拥有一定数量的内存储备。
 
-​	**需要注意的是，这里不会涉及到CPU的隔离，slot目前仅仅用来隔离task的受管理的内存**。
+​ **需要注意的是，这里不会涉及到CPU的隔离，slot目前仅仅用来隔离task的受管理的内存**。
 
-​	通过调整task slot的数量，允许用户定义subtask之间如何互相隔离。如果一个TaskManager一个slot，那将意味着每个task group运行在独立的JVM中（该JVM可能是通过一个特定的容器启动的），而一个TaskManager多个slot意味着更多的subtask可以共享同一个JVM。<u>而在同一个JVM进程中的task将共享TCP连接（基于多路复用）和心跳消息。它们也可能共享数据集和数据结构，因此这减少了每个task的负载。</u>
+​ 通过调整task slot的数量，允许用户定义subtask之间如何互相隔离。如果一个TaskManager一个slot，那将意味着每个task group运行在独立的JVM中（该JVM可能是通过一个特定的容器启动的），而一个TaskManager多个slot意味着更多的subtask可以共享同一个JVM。<u>而在同一个JVM进程中的task将共享TCP连接（基于多路复用）和心跳消息。它们也可能共享数据集和数据结构，因此这减少了每个task的负载。</u>
 
 ### 4.3.2 Slot和并行度
 
@@ -651,9 +651,9 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200524215251380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-​	假设一共有3个TaskManager，每一个TaskManager中的分配3个TaskSlot，也就是每个TaskManager可以接收3个task，一共9个TaskSlot，如果我们设置`parallelism.default=1`，即运行程序默认的并行度为1，9个TaskSlot只用了1个，有8个空闲，因此，设置合适的并行度才能提高效率。
+​ 假设一共有3个TaskManager，每一个TaskManager中的分配3个TaskSlot，也就是每个TaskManager可以接收3个task，一共9个TaskSlot，如果我们设置`parallelism.default=1`，即运行程序默认的并行度为1，9个TaskSlot只用了1个，有8个空闲，因此，设置合适的并行度才能提高效率。
 
-​	*ps：上图最后一个因为是输出到文件，避免多个Slot（多线程）里的算子都输出到同一个文件互相覆盖等混乱问题，直接设置sink的并行度为1。*
+​ *ps：上图最后一个因为是输出到文件，避免多个Slot（多线程）里的算子都输出到同一个文件互相覆盖等混乱问题，直接设置sink的并行度为1。*
 
 ### 4.3.3 程序和数据流（DataFlow）
 
@@ -673,7 +673,7 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ### 4.3.4 执行图（**ExecutionGraph**）
 
-​	由Flink程序直接映射成的数据流图是StreamGraph，也被称为**逻辑流图**，因为它们表示的是计算逻辑的高级视图。为了执行一个流处理程序，Flink需要将**逻辑流图**转换为**物理数据流图**（也叫**执行图**），详细说明程序的执行方式。
+​ 由Flink程序直接映射成的数据流图是StreamGraph，也被称为**逻辑流图**，因为它们表示的是计算逻辑的高级视图。为了执行一个流处理程序，Flink需要将**逻辑流图**转换为**物理数据流图**（也叫**执行图**），详细说明程序的执行方式。
 
 + Flink 中的执行图可以分成四层：StreamGraph -> JobGraph -> ExecutionGraph -> 物理执行图。
 
@@ -699,16 +699,16 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ### 4.3.6 任务链（OperatorChains）
 
-​	Flink 采用了一种称为任务链的优化技术，可以在特定条件下减少本地通信的开销。为了满足任务链的要求，必须将两个或多个算子设为**相同的并行度**，并通过本地转发（local forward）的方式进行连接
+​ Flink 采用了一种称为任务链的优化技术，可以在特定条件下减少本地通信的开销。为了满足任务链的要求，必须将两个或多个算子设为**相同的并行度**，并通过本地转发（local forward）的方式进行连接
 
 + **相同并行度**的 **one-to-one 操作**，Flink 这样相连的算子链接在一起形成一个 task，原来的算子成为里面的 subtask
   + 并行度相同、并且是 one-to-one 操作，两个条件缺一不可
 
-​	**为什么需要并行度相同，因为若flatMap并行度为1，到了之后的map并行度为2，从flatMap到map的数据涉及到数据由于并行度map为2会往两个slot处理，数据会分散，所产生的元素个数和顺序发生的改变所以有2个单独的task，不能成为任务链**
+​ **为什么需要并行度相同，因为若flatMap并行度为1，到了之后的map并行度为2，从flatMap到map的数据涉及到数据由于并行度map为2会往两个slot处理，数据会分散，所产生的元素个数和顺序发生的改变所以有2个单独的task，不能成为任务链**
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200524220815415.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-​	**如果前后任务逻辑上可以是OneToOne，且并行度一致，那么就能合并在一个Slot里**（并行度原本是多少就是多少，两者并行度一致）执行。
+​ **如果前后任务逻辑上可以是OneToOne，且并行度一致，那么就能合并在一个Slot里**（并行度原本是多少就是多少，两者并行度一致）执行。
 
 + keyBy需要根据Hash值分配给不同slot执行，所以只能Hash，不能OneToOne。
 + 逻辑上可OneToOne但是并行度不同，那么就会Rebalance，轮询形式分配给下一个任务的多个slot。
@@ -733,11 +733,11 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ### 5.1.1 getExecutionEnvironment
 
-​	创建一个执行环境，表示当前执行程序的上下文。如果程序是独立调用的，则此方法返回本地执行环境；如果从命令行客户端调用程序以提交到集群，则此方法返回此集群的执行环境，也就是说，getExecutionEnvironment会根据查询运行的方式决定返回什么样的运行环境，是最常用的一种创建执行环境的方式。
+​ 创建一个执行环境，表示当前执行程序的上下文。如果程序是独立调用的，则此方法返回本地执行环境；如果从命令行客户端调用程序以提交到集群，则此方法返回此集群的执行环境，也就是说，getExecutionEnvironment会根据查询运行的方式决定返回什么样的运行环境，是最常用的一种创建执行环境的方式。
 
-`ExecutionEnvironment env = ExecutionEnvironment.*getExecutionEnvironment*(); `
+`ExecutionEnvironment env = ExecutionEnvironment.*getExecutionEnvironment*();`
 
-`StreamExecutionEnvironment env = StreamExecutionEnvironment.*getExecutionEnvironment*(); `
+`StreamExecutionEnvironment env = StreamExecutionEnvironment.*getExecutionEnvironment*();`
 
 如果没有设置并行度，会以flink-conf.yaml中的配置为准，默认是1。
 
@@ -745,13 +745,13 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ### 5.1.2 createLocalEnvironment
 
-​	返回本地执行环境，需要在调用时指定默认的并行度。
+​ 返回本地执行环境，需要在调用时指定默认的并行度。
 
-`LocalStreamEnvironment env = StreamExecutionEnvironment.*createLocalEnvironment*(1); `
+`LocalStreamEnvironment env = StreamExecutionEnvironment.*createLocalEnvironment*(1);`
 
 ### 5.1.3 createRemoteEnvironment
 
-​	返回集群执行环境，将Jar提交到远程服务器。需要在调用时指定JobManager的IP和端口号，并指定要在集群中运行的Jar包。
+​ 返回集群执行环境，将Jar提交到远程服务器。需要在调用时指定JobManager的IP和端口号，并指定要在集群中运行的Jar包。
 
 `StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironment(1);`
 
@@ -937,19 +937,19 @@ sensor_1,1547718212,37.1
 2. 启动zookeeper
 
    ```shell
-   $ bin/zookeeper-server-start.sh config/zookeeper.properties
+   bin/zookeeper-server-start.sh config/zookeeper.properties
    ```
 
 3. 启动kafka服务
 
    ```shell
-   $ bin/kafka-server-start.sh config/server.properties
+   bin/kafka-server-start.sh config/server.properties
    ```
 
 4. 启动kafka生产者
 
    ```shell
-   $ bin/kafka-console-producer.sh --broker-list localhost:9092  --topic sensor
+   bin/kafka-console-producer.sh --broker-list localhost:9092  --topic sensor
    ```
 
 5. 编写java代码
@@ -1330,11 +1330,11 @@ result> SensorReading{id='sensor_1', timestamp=1547718212, temperature=37.1}
 
 #### reduce
 
-​	**Reduce适用于更加一般化的聚合操作场景**。java中需要实现`ReduceFunction`函数式接口。
+​ **Reduce适用于更加一般化的聚合操作场景**。java中需要实现`ReduceFunction`函数式接口。
 
 ---
 
-​	在前面Rolling Aggregation的前提下，对需求进行修改。获取同组历史温度最高的传感器信息，同时要求实时更新其时间戳信息。
+​ 在前面Rolling Aggregation的前提下，对需求进行修改。获取同组历史温度最高的传感器信息，同时要求实时更新其时间戳信息。
 
 java代码如下：
 
@@ -1424,12 +1424,14 @@ result> SensorReading{id='sensor_1', timestamp=1547718212, temperature=37.1}
 **注：新版Flink已经不存在Split和Select这两个API了（至少Flink1.12.1没有！）**
 
 ##### Split
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200902194203248.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RvbmdrYW5nMTIzNDU2,size_16,color_FFFFFF,t_70#pic_center)
 **DataStream -> SplitStream**：根据某些特征把DataStream拆分成SplitStream;
 
 **SplitStream虽然看起来像是两个Stream，但是其实它是一个特殊的Stream**;
 
 ##### Select
+
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200902194442828.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RvbmdrYW5nMTIzNDU2,size_16,color_FFFFFF,t_70#pic_center)
 **SplitStream -> DataStream**：从一个SplitStream中获取一个或者多个DataStream;
 
@@ -1658,24 +1660,24 @@ public class TransformTest4_MultipleStreams {
 
 > [Flink常用算子Transformation（转换）](https://blog.csdn.net/a_drjiaoda/article/details/89357916)
 
-​	在Storm中，我们常常用Bolt的层级关系来表示各个数据的流向关系，组成一个拓扑。
+​ 在Storm中，我们常常用Bolt的层级关系来表示各个数据的流向关系，组成一个拓扑。
 
-​	在Flink中，**Transformation算子就是将一个或多个DataStream转换为新的DataStream**，可以将多个转换组合成复杂的数据流拓扑。
-​	如下图所示，DataStream会由不同的Transformation操作，转换、过滤、聚合成其他不同的流，从而完成我们的业务要求。
+​ 在Flink中，**Transformation算子就是将一个或多个DataStream转换为新的DataStream**，可以将多个转换组合成复杂的数据流拓扑。
+​ 如下图所示，DataStream会由不同的Transformation操作，转换、过滤、聚合成其他不同的流，从而完成我们的业务要求。
 
 ![img](https://img-blog.csdnimg.cn/20190417171341810.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FfZHJqaWFvZGE=,size_16,color_FFFFFF,t_70)
 
 ## 5.4 支持的数据类型
 
-​	Flink流应用程序处理的是以数据对象表示的事件流。所以在Flink内部，我们需要能够处理这些对象。它们**需要被序列化和反序列化**，以便通过网络传送它们；或者从状态后端、检查点和保存点读取它们。为了有效地做到这一点，Flink需要明确知道应用程序所处理的数据类型。Flink使用类型信息的概念来表示数据类型，并为每个数据类型生成特定的序列化器、反序列化器和比较器。
+​ Flink流应用程序处理的是以数据对象表示的事件流。所以在Flink内部，我们需要能够处理这些对象。它们**需要被序列化和反序列化**，以便通过网络传送它们；或者从状态后端、检查点和保存点读取它们。为了有效地做到这一点，Flink需要明确知道应用程序所处理的数据类型。Flink使用类型信息的概念来表示数据类型，并为每个数据类型生成特定的序列化器、反序列化器和比较器。
 
-​	Flink还具有一个类型提取系统，该系统分析函数的输入和返回类型，以自动获取类型信息，从而获得序列化器和反序列化器。但是，在某些情况下，例如lambda函数或泛型类型，需要显式地提供类型信息，才能使应用程序正常工作或提高其性能。
+​ Flink还具有一个类型提取系统，该系统分析函数的输入和返回类型，以自动获取类型信息，从而获得序列化器和反序列化器。但是，在某些情况下，例如lambda函数或泛型类型，需要显式地提供类型信息，才能使应用程序正常工作或提高其性能。
 
-​	Flink支持Java和Scala中所有常见数据类型。使用最广泛的类型有以下几种。
+​ Flink支持Java和Scala中所有常见数据类型。使用最广泛的类型有以下几种。
 
 ### 5.4.1 基础数据类型
 
-​	Flink支持所有的Java和Scala基础数据类型，Int, Double, Long, String, …
+​ Flink支持所有的Java和Scala基础数据类型，Int, Double, Long, String, …
 
 ```java
 DataStream<Integer> numberStream = env.fromElements(1, 2, 3, 4);
@@ -1735,9 +1737,9 @@ Flink对Java和Scala中的一些特殊目的的类型也都是支持的，比如
 
 ### 5.5.1 函数类(Function Classes)
 
-​	Flink暴露了所有UDF函数的接口(实现方式为接口或者抽象类)。例如MapFunction, FilterFunction, ProcessFunction等等。
+​ Flink暴露了所有UDF函数的接口(实现方式为接口或者抽象类)。例如MapFunction, FilterFunction, ProcessFunction等等。
 
-​	下面例子实现了FilterFunction接口：
+​ 下面例子实现了FilterFunction接口：
 
 ```java
 DataStream<String> flinkTweets = tweets.filter(new FlinkFilter()); 
@@ -1748,7 +1750,7 @@ public static class FlinkFilter implements FilterFunction<String> {
 }
 ```
 
-​	还可以将函数实现成匿名类
+​ 还可以将函数实现成匿名类
 
 ```java
 DataStream<String> flinkTweets = tweets.filter(
@@ -1760,7 +1762,7 @@ DataStream<String> flinkTweets = tweets.filter(
 );
 ```
 
-​	我们filter的字符串"flink"还可以当作参数传进去。
+​ 我们filter的字符串"flink"还可以当作参数传进去。
 
 ```java
 DataStream<String> tweets = env.readTextFile("INPUT_FILE "); 
@@ -1787,9 +1789,9 @@ DataStream<String> flinkTweets = tweets.filter( tweet -> tweet.contains("flink")
 
 ### 5.5.3 富函数(Rich Functions)
 
-​	“富函数”是DataStream API提供的一个函数类的接口，所有Flink函数类都有其Rich版本。
+​ “富函数”是DataStream API提供的一个函数类的接口，所有Flink函数类都有其Rich版本。
 
-​	**它与常规函数的不同在于，可以获取运行环境的上下文，并拥有一些生命周期方法，所以可以实现更复杂的功能**。
+​ **它与常规函数的不同在于，可以获取运行环境的上下文，并拥有一些生命周期方法，所以可以实现更复杂的功能**。
 
 + RichMapFunction
 
@@ -1799,7 +1801,7 @@ DataStream<String> flinkTweets = tweets.filter( tweet -> tweet.contains("flink")
 
 + …
 
-​	Rich Function有一个**生命周期**的概念。典型的生命周期方法有：
+​ Rich Function有一个**生命周期**的概念。典型的生命周期方法有：
 
 + **`open()`方法是rich function的初始化方法，当一个算子例如map或者filter被调用之前`open()`会被调用。**
 
@@ -2010,13 +2012,13 @@ global:1> SensorReading{id='sensor_1', timestamp=1547718212, temperature=37.1}
 
 > [Flink之流处理API之Sink](https://blog.csdn.net/lixinkuan328/article/details/104116894)
 
-​	Flink没有类似于spark中foreach方法，让用户进行迭代的操作。虽有对外的输出操作都要利用Sink完成。最后通过类似如下方式完成整个任务最终输出操作。
+​ Flink没有类似于spark中foreach方法，让用户进行迭代的操作。虽有对外的输出操作都要利用Sink完成。最后通过类似如下方式完成整个任务最终输出操作。
 
 ```java
 stream.addSink(new MySink(xxxx)) 
 ```
 
-​	官方提供了一部分的框架的sink。除此以外，需要用户自定义实现sink。
+​ 官方提供了一部分的框架的sink。除此以外，需要用户自定义实现sink。
 
 ![img](https://img-blog.csdnimg.cn/20200130221249884.png)
 
@@ -2123,25 +2125,25 @@ stream.addSink(new MySink(xxxx))
 3. 启动zookeeper
 
    ```shell
-   $ bin/zookeeper-server-start.sh config/zookeeper.properties
+   bin/zookeeper-server-start.sh config/zookeeper.properties
    ```
 
 4. 启动kafka服务
 
    ```shell
-   $ bin/kafka-server-start.sh config/server.properties
+   bin/kafka-server-start.sh config/server.properties
    ```
 
 5. 新建kafka生产者console
 
    ```shell
-   $ bin/kafka-console-producer.sh --broker-list localhost:9092  --topic sensor
+   bin/kafka-console-producer.sh --broker-list localhost:9092  --topic sensor
    ```
 
 6. 新建kafka消费者console
 
    ```shell
-   $ bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic sinktest
+   bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic sinktest
    ```
 
 7. 运行Flink程序，在kafka生产者console输入数据，查看kafka消费者console的输出结果
@@ -2462,7 +2464,7 @@ stream.addSink(new MySink(xxxx))
 
 > [Flink之Mysql数据CDC](https://www.cnblogs.com/ywjfx/p/14263718.html)
 >
-> [JDBC Connector](https://ci.apache.org/projects/flink/flink-docs-release-1.12/zh/dev/connectors/jdbc.html)	<=	官方目前没有专门针对MySQL的，我们自己实现就好了
+> [JDBC Connector](https://ci.apache.org/projects/flink/flink-docs-release-1.12/zh/dev/connectors/jdbc.html) <= 官方目前没有专门针对MySQL的，我们自己实现就好了
 
 这里测试的是连接MySQL。
 
@@ -2622,11 +2624,11 @@ stream.addSink(new MySink(xxxx))
 
 ### 5.8.1 Window Join
 
-​	A window join joins the elements of two streams that share a common key and lie in the same window. These windows can be defined by using a [window assigner](https://ci.apache.org/projects/flink/flink-docs-release-1.12/zh/dev/stream/operators/windows.html#window-assigners) and are evaluated on elements from both of the streams.
+​ A window join joins the elements of two streams that share a common key and lie in the same window. These windows can be defined by using a [window assigner](https://ci.apache.org/projects/flink/flink-docs-release-1.12/zh/dev/stream/operators/windows.html#window-assigners) and are evaluated on elements from both of the streams.
 
-​	The elements from both sides are then passed to a user-defined `JoinFunction` or `FlatJoinFunction` 	where the user can emit results that meet the join criteria.
+​ The elements from both sides are then passed to a user-defined `JoinFunction` or `FlatJoinFunction`  where the user can emit results that meet the join criteria.
 
-​	The general usage can be summarized as follows:
+​ The general usage can be summarized as follows:
 
 ```java
 stream.join(otherStream)
@@ -2638,11 +2640,11 @@ stream.join(otherStream)
 
 #### Tumbling Window Join
 
-​	When performing a tumbling window join, all elements with a common key and a common tumbling window are joined as pairwise combinations and passed on to a `JoinFunction` or `FlatJoinFunction`. Because this behaves like an inner join, elements of one stream that do not have elements from another stream in their tumbling window are not emitted!
+​ When performing a tumbling window join, all elements with a common key and a common tumbling window are joined as pairwise combinations and passed on to a `JoinFunction` or `FlatJoinFunction`. Because this behaves like an inner join, elements of one stream that do not have elements from another stream in their tumbling window are not emitted!
 
 ![img](https://ci.apache.org/projects/flink/flink-docs-release-1.12/fig/tumbling-window-join.svg)
 
-​	As illustrated in the figure, we define a tumbling window with the size of 2 milliseconds, which results in windows of the form `[0,1], [2,3], ...`. The image shows the pairwise combinations of all elements in each window which will be passed on to the `JoinFunction`. Note that in the tumbling window `[6,7]` nothing is emitted because no elements exist in the green stream to be joined with the orange elements ⑥ and ⑦.
+​ As illustrated in the figure, we define a tumbling window with the size of 2 milliseconds, which results in windows of the form `[0,1], [2,3], ...`. The image shows the pairwise combinations of all elements in each window which will be passed on to the `JoinFunction`. Note that in the tumbling window `[6,7]` nothing is emitted because no elements exist in the green stream to be joined with the orange elements ⑥ and ⑦.
 
 ```java
 import org.apache.flink.api.java.functions.KeySelector;
@@ -2666,13 +2668,13 @@ orangeStream.join(greenStream)
     });
 ```
 
-####  Sliding Window Join
+#### Sliding Window Join
 
-​	When performing a sliding window join, all elements with a common key and common sliding window are joined as pairwise combinations and passed on to the `JoinFunction` or `FlatJoinFunction`. Elements of one stream that do not have elements from the other stream in the current sliding window are not emitted! Note that some elements might be joined in one sliding window but not in another!
+​ When performing a sliding window join, all elements with a common key and common sliding window are joined as pairwise combinations and passed on to the `JoinFunction` or `FlatJoinFunction`. Elements of one stream that do not have elements from the other stream in the current sliding window are not emitted! Note that some elements might be joined in one sliding window but not in another!
 
 ![img](https://ci.apache.org/projects/flink/flink-docs-release-1.12/fig/sliding-window-join.svg)
 
-​	In this example we are using sliding windows with a size of two milliseconds and slide them by one millisecond, resulting in the sliding windows `[-1, 0],[0,1],[1,2],[2,3], …`. The joined elements below the x-axis are the ones that are passed to the `JoinFunction` for each sliding window. Here you can also see how for example the orange ② is joined with the green ③ in the window `[2,3]`, but is not joined with anything in the window `[1,2]`.
+​ In this example we are using sliding windows with a size of two milliseconds and slide them by one millisecond, resulting in the sliding windows `[-1, 0],[0,1],[1,2],[2,3], …`. The joined elements below the x-axis are the ones that are passed to the `JoinFunction` for each sliding window. Here you can also see how for example the orange ② is joined with the green ③ in the window `[2,3]`, but is not joined with anything in the window `[1,2]`.
 
 ```java
 import org.apache.flink.api.java.functions.KeySelector;
@@ -2698,11 +2700,11 @@ orangeStream.join(greenStream)
 
 #### Session Window Join
 
-​	When performing a session window join, all elements with the same key that when *“combined”* fulfill the session criteria are joined in pairwise combinations and passed on to the `JoinFunction` or `FlatJoinFunction`. Again this performs an inner join, so if there is a session window that only contains elements from one stream, no output will be emitted!
+​ When performing a session window join, all elements with the same key that when *“combined”* fulfill the session criteria are joined in pairwise combinations and passed on to the `JoinFunction` or `FlatJoinFunction`. Again this performs an inner join, so if there is a session window that only contains elements from one stream, no output will be emitted!
 
 ![img](https://ci.apache.org/projects/flink/flink-docs-release-1.12/fig/session-window-join.svg)
 
-​	Here we define a session window join where each session is divided by a gap of at least 1ms. There are three sessions, and in the first two sessions the joined elements from both streams are passed to the `JoinFunction`. In the third session there are no elements in the green stream, so ⑧ and ⑨ are not joined!
+​ Here we define a session window join where each session is divided by a gap of at least 1ms. There are three sessions, and in the first two sessions the joined elements from both streams are passed to the `JoinFunction`. In the third session there are no elements in the green stream, so ⑧ and ⑨ are not joined!
 
 ```java
 import org.apache.flink.api.java.functions.KeySelector;
@@ -2783,9 +2785,9 @@ orangeStream
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200903082944202.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RvbmdrYW5nMTIzNDU2,size_16,color_FFFFFF,t_70#pic_center)
 
-​	streaming流式计算是一种被设计用于处理无限数据集的数据处理引擎，而无限数据集是指一种不断增长的本质上无限的数据集，而**window是一种切割无限数据为有限块进行处理的手段**。
+​ streaming流式计算是一种被设计用于处理无限数据集的数据处理引擎，而无限数据集是指一种不断增长的本质上无限的数据集，而**window是一种切割无限数据为有限块进行处理的手段**。
 
-​	**Window是无限数据流处理的核心，Window将一个无限的stream拆分成有限大小的”buckets”桶，我们可以在这些桶上做计算操作**。
+​ **Window是无限数据流处理的核心，Window将一个无限的stream拆分成有限大小的”buckets”桶，我们可以在这些桶上做计算操作**。
 
 *举例子：假设按照时间段划分桶，接收到的数据马上能判断放到哪个桶，且多个桶的数据能并行被处理。（迟到的数据也可判断是原本属于哪个桶的）*
 
@@ -2889,11 +2891,11 @@ DataStream<Tuple2<String,Double>> minTempPerWindowStream =
 
 ### 6.2.2 TimeWindow
 
-​	TimeWindow将指定时间范围内的所有数据组成一个window，一次对一个window里面的所有数据进行计算。
+​ TimeWindow将指定时间范围内的所有数据组成一个window，一次对一个window里面的所有数据进行计算。
 
 #### 滚动窗口
 
-​	Flink默认的时间窗口根据ProcessingTime进行窗口的划分，将Flink获取到的数据根据进入Flink的时间划分到不同的窗口中。
+​ Flink默认的时间窗口根据ProcessingTime进行窗口的划分，将Flink获取到的数据根据进入Flink的时间划分到不同的窗口中。
 
 ```java
 DataStream<Tuple2<String, Double>> minTempPerWindowStream = dataStream 
@@ -2908,13 +2910,13 @@ DataStream<Tuple2<String, Double>> minTempPerWindowStream = dataStream
   .minBy(1);
 ```
 
-​	时间间隔可以通过`Time.milliseconds(x)`，`Time.seconds(x)`，`Time.minutes(x)`等其中的一个来指定。
+​ 时间间隔可以通过`Time.milliseconds(x)`，`Time.seconds(x)`，`Time.minutes(x)`等其中的一个来指定。
 
 #### 滑动窗口
 
-​	滑动窗口和滚动窗口的函数名是完全一致的，只是在传参数时需要传入两个参数，一个是window_size，一个是sliding_size。
+​ 滑动窗口和滚动窗口的函数名是完全一致的，只是在传参数时需要传入两个参数，一个是window_size，一个是sliding_size。
 
-​	下面代码中的sliding_size设置为了5s，也就是说，每5s就计算输出结果一次，每一次计算的window范围是15s内的所有元素。
+​ 下面代码中的sliding_size设置为了5s，也就是说，每5s就计算输出结果一次，每一次计算的window范围是15s内的所有元素。
 
 ```java
 DataStream<SensorReading> minTempPerWindowStream = dataStream 
@@ -2923,17 +2925,17 @@ DataStream<SensorReading> minTempPerWindowStream = dataStream
   .minBy("temperature");
 ```
 
-​	时间间隔可以通过`Time.milliseconds(x)`，`Time.seconds(x)`，`Time.minutes(x)`等其中的一个来指定。
+​ 时间间隔可以通过`Time.milliseconds(x)`，`Time.seconds(x)`，`Time.minutes(x)`等其中的一个来指定。
 
 ### 6.2.3 CountWindow
 
-​	CountWindow根据窗口中相同key元素的数量来触发执行，执行时只计算元素数量达到窗口大小的key对应的结果。
+​ CountWindow根据窗口中相同key元素的数量来触发执行，执行时只计算元素数量达到窗口大小的key对应的结果。
 
-​	**注意：CountWindow的window_size指的是相同Key的元素的个数，不是输入的所有元素的总数。**
+​ **注意：CountWindow的window_size指的是相同Key的元素的个数，不是输入的所有元素的总数。**
 
 #### 滚动窗口
 
-​	默认的CountWindow是一个滚动窗口，只需要指定窗口大小即可，**当元素数量达到窗口大小时，就会触发窗口的执行**。
+​ 默认的CountWindow是一个滚动窗口，只需要指定窗口大小即可，**当元素数量达到窗口大小时，就会触发窗口的执行**。
 
 ```java
 DataStream<SensorReading> minTempPerWindowStream = dataStream 
@@ -2944,9 +2946,9 @@ DataStream<SensorReading> minTempPerWindowStream = dataStream
 
 #### 滑动窗口
 
-​	滑动窗口和滚动窗口的函数名是完全一致的，只是在传参数时需要传入两个参数，一个是window_size，一个是sliding_size。
+​ 滑动窗口和滚动窗口的函数名是完全一致的，只是在传参数时需要传入两个参数，一个是window_size，一个是sliding_size。
 
-​	下面代码中的sliding_size设置为了2，也就是说，每收到两个相同key的数据就计算一次，每一次计算的window范围是10个元素。
+​ 下面代码中的sliding_size设置为了2，也就是说，每收到两个相同key的数据就计算一次，每一次计算的window范围是10个元素。
 
 ```java
 DataStream<SensorReading> minTempPerWindowStream = dataStream 
@@ -3385,7 +3387,7 @@ window function 定义了要对窗口中收集的数据做的计算操作，主�
 
 + Processing Time：执行操作算子的本地系统时间，与机器相关；
 
-​	*Event Time是事件创建的时间。它通常由事件中的时间戳描述，例如采集的日志数据中，每一条日志都会记录自己的生成时间，Flink通过时间戳分配器访问事件时间戳。*	
+​ *Event Time是事件创建的时间。它通常由事件中的时间戳描述，例如采集的日志数据中，每一条日志都会记录自己的生成时间，Flink通过时间戳分配器访问事件时间戳。*
 
 ---
 
@@ -3398,9 +3400,9 @@ window function 定义了要对窗口中收集的数据做的计算操作，主�
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200526200432798.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-​	这里假设玩游戏，两分钟内如果过5关就有奖励。用户坐地铁玩游戏，进入隧道前已经过3关，在隧道中又过了2关。但是信号不好，后两关通关的信息，等到出隧道的时候（8:23:20）才正式到达服务器。
+​ 这里假设玩游戏，两分钟内如果过5关就有奖励。用户坐地铁玩游戏，进入隧道前已经过3关，在隧道中又过了2关。但是信号不好，后两关通关的信息，等到出隧道的时候（8:23:20）才正式到达服务器。
 
-​	如果为了用户体验，那么应该按照Event Time处理信息，保证用户获得游戏奖励。
+​ 如果为了用户体验，那么应该按照Event Time处理信息，保证用户获得游戏奖励。
 
 + Event Time可以从日志数据的时间戳（timestamp）中提取
 
@@ -3410,11 +3412,11 @@ window function 定义了要对窗口中收集的数据做的计算操作，主�
 
 ## 7.2 EventTime的引入
 
-​	**在Flink的流式处理中，绝大部分的业务都会使用eventTime**，一般只在eventTime无法使用时，才会被迫使用ProcessingTime或者IngestionTime。
+​ **在Flink的流式处理中，绝大部分的业务都会使用eventTime**，一般只在eventTime无法使用时，才会被迫使用ProcessingTime或者IngestionTime。
 
-​	*（虽然默认环境里使用的就是ProcessingTime，使用EventTime需要另外设置）*
+​ *（虽然默认环境里使用的就是ProcessingTime，使用EventTime需要另外设置）*
 
-​	如果要使用EventTime，那么需要引入EventTime的时间属性，引入方式如下所示：
+​ 如果要使用EventTime，那么需要引入EventTime的时间属性，引入方式如下所示：
 
 ```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -3426,24 +3428,24 @@ env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 ## 7.3 Watermark
 
-> [Flink流计算编程--watermark（水位线）简介](https://blog.csdn.net/lmalds/article/details/52704170)	<=	不错的文章，建议阅读
+> [Flink流计算编程--watermark（水位线）简介](https://blog.csdn.net/lmalds/article/details/52704170) <= 不错的文章，建议阅读
 
 ### 7.3.1 概念
 
-* **Flink对于迟到数据有三层保障**，先来后到的保障顺序是：
-  * WaterMark => 约等于放宽窗口标准
-  * allowedLateness => 允许迟到（ProcessingTime超时，但是EventTime没超时）
-  * sideOutputLateData => 超过迟到时间，另外捕获，之后可以自己批处理合并先前的数据
++ **Flink对于迟到数据有三层保障**，先来后到的保障顺序是：
+  + WaterMark => 约等于放宽窗口标准
+  + allowedLateness => 允许迟到（ProcessingTime超时，但是EventTime没超时）
+  + sideOutputLateData => 超过迟到时间，另外捕获，之后可以自己批处理合并先前的数据
 
 ---
 
 > [Flink-时间语义与Wartmark及EventTime在Window中的使用](https://blog.csdn.net/qq_40180229/article/details/106363815)
 
-​	我们知道，流处理从事件产生，到流经source，再到operator，中间是有一个过程和时间的，虽然大部分情况下，流到operator的数据都是按照事件产生的时间顺序来的，但是也不排除由于网络、分布式等原因，导致乱序的产生，所谓乱序，就是指Flink接收到的事件的先后顺序不是严格按照事件的Event Time顺序排列的。
+​ 我们知道，流处理从事件产生，到流经source，再到operator，中间是有一个过程和时间的，虽然大部分情况下，流到operator的数据都是按照事件产生的时间顺序来的，但是也不排除由于网络、分布式等原因，导致乱序的产生，所谓乱序，就是指Flink接收到的事件的先后顺序不是严格按照事件的Event Time顺序排列的。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200526201305372.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-​	那么此时出现一个问题，一旦出现乱序，如果只根据eventTime决定window的运行，我们不能明确数据是否全部到位，但又不能无限期的等下去，此时必须要有个机制来保证一个特定的时间后，必须触发window去进行计算了，这个特别的机制，就是Watermark。
+​ 那么此时出现一个问题，一旦出现乱序，如果只根据eventTime决定window的运行，我们不能明确数据是否全部到位，但又不能无限期的等下去，此时必须要有个机制来保证一个特定的时间后，必须触发window去进行计算了，这个特别的机制，就是Watermark。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200526201418333.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
@@ -3488,15 +3490,15 @@ env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2020052620175060.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-​	当Flink接收到数据时，会按照一定的规则去生成Watermark，这条<u>Watermark就等于当前所有到达数据中的maxEventTime-延迟时长</u>，也就是说，**Watermark是基于数据携带的时间戳生成的**，一旦Watermark比当前未触发的窗口的停止时间要晚，那么就会触发相应窗口的执行。
+​ 当Flink接收到数据时，会按照一定的规则去生成Watermark，这条<u>Watermark就等于当前所有到达数据中的maxEventTime-延迟时长</u>，也就是说，**Watermark是基于数据携带的时间戳生成的**，一旦Watermark比当前未触发的窗口的停止时间要晚，那么就会触发相应窗口的执行。
 
-​	**由于event time是由数据携带的，因此，如果运行过程中无法获取新的数据，那么没有被触发的窗口将永远都不被触发**。
+​ **由于event time是由数据携带的，因此，如果运行过程中无法获取新的数据，那么没有被触发的窗口将永远都不被触发**。
 
-​	上图中，我们设置的允许最大延迟到达时间为2s，所以时间戳为7s的事件对应的Watermark是5s，时间戳为12s的事件的Watermark是10s，如果我们的窗口1是`1s~5s`，窗口2是`6s~10s`，那么时间戳为7s的事件到达时的Watermarker恰好触发窗口1，时间戳为12s的事件到达时的Watermark恰好触发窗口2。
+​ 上图中，我们设置的允许最大延迟到达时间为2s，所以时间戳为7s的事件对应的Watermark是5s，时间戳为12s的事件的Watermark是10s，如果我们的窗口1是`1s~5s`，窗口2是`6s~10s`，那么时间戳为7s的事件到达时的Watermarker恰好触发窗口1，时间戳为12s的事件到达时的Watermark恰好触发窗口2。
 
-​	**Watermark 就是触发前一窗口的“关窗时间”，一旦触发关门那么以当前时刻为准在窗口范围内的所有所有数据都会收入窗中。**
+​ **Watermark 就是触发前一窗口的“关窗时间”，一旦触发关门那么以当前时刻为准在窗口范围内的所有所有数据都会收入窗中。**
 
-​	**只要没有达到水位那么不管现实中的时间推进了多久都不会触发关窗。**
+​ **只要没有达到水位那么不管现实中的时间推进了多久都不会触发关窗。**
 
 ### 7.3.2 Watermark的特点
 
@@ -3521,7 +3523,7 @@ env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
 ### 7.3.4 Watermark的引入
 
-​	watermark的引入很简单，对于乱序数据，最常见的引用方式如下：
+​ watermark的引入很简单，对于乱序数据，最常见的引用方式如下：
 
 ```scala
 dataStream.assignTimestampsAndWatermarks( new BoundedOutOfOrdernessTimestampExtractor<SensorReading>(Time.milliseconds(1000)) {
@@ -3532,9 +3534,9 @@ dataStream.assignTimestampsAndWatermarks( new BoundedOutOfOrdernessTimestampExtr
 });
 ```
 
-​	**Event Time的使用一定要指定数据源中的时间戳。否则程序无法知道事件的事件时间是什么(数据源里的数据没有时间戳的话，就只能使用Processing Time了)**。
+​ **Event Time的使用一定要指定数据源中的时间戳。否则程序无法知道事件的事件时间是什么(数据源里的数据没有时间戳的话，就只能使用Processing Time了)**。
 
-​	我们看到上面的例子中创建了一个看起来有点复杂的类，这个类实现的其实就是分配时间戳的接口。Flink暴露了TimestampAssigner接口供我们实现，使我们可以自定义如何从事件数据中抽取时间戳。
+​ 我们看到上面的例子中创建了一个看起来有点复杂的类，这个类实现的其实就是分配时间戳的接口。Flink暴露了TimestampAssigner接口供我们实现，使我们可以自定义如何从事件数据中抽取时间戳。
 
 ```java
 StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -3570,7 +3572,7 @@ MyAssigner有两种类型
 + 如果Watermark设置的延迟太久，收到结果的速度可能就会很慢，解决办法是在水位线到达之前输出一个近似结果
 + 如果Watermark到达得太早，则可能收到错误结果，不过Flink处理迟到数据的机制可以解决这个问题
 
-​	*一般大数据场景都是考虑高并发情况，所以一般使用周期性生成Watermark的方式，避免频繁地生成Watermark。*
+​ *一般大数据场景都是考虑高并发情况，所以一般使用周期性生成Watermark的方式，避免频繁地生成Watermark。*
 
 ---
 
@@ -3804,13 +3806,13 @@ minTemp:3> SensorReading{id='sensor_6', timestamp=1547718201, temperature=15.4}
 
 > [flink-Window Assingers(窗口分配器)中offset偏移量](https://juejin.cn/post/6844904110941011976)
 
-​	时间偏移一个很大的用处是用来调准非0时区的窗口，例如:在中国你需要指定一个8小时的时间偏移。
+​ 时间偏移一个很大的用处是用来调准非0时区的窗口，例如:在中国你需要指定一个8小时的时间偏移。
 
 # 8. Flink状态管理
 
 > [Flink_Flink中的状态](https://blog.csdn.net/dongkang123456/article/details/108430338)
 >
-> [Flink状态管理详解：Keyed State和Operator List State深度解析](https://zhuanlan.zhihu.com/p/104171679)	<=	不错的文章，建议阅读
+> [Flink状态管理详解：Keyed State和Operator List State深度解析](https://zhuanlan.zhihu.com/p/104171679) <= 不错的文章，建议阅读
 
 + 算子状态（Operator State）
 + 键控状态（Keyed State）
@@ -3820,14 +3822,14 @@ minTemp:3> SensorReading{id='sensor_6', timestamp=1547718201, temperature=15.4}
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200906125916475.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2RvbmdrYW5nMTIzNDU2,size_16,color_FFFFFF,t_70#pic_center)
 
-- 由一个任务维护，并且用来计算某个结果的所有数据，都属于这个任务的状态
-- 可以认为任务状态就是一个本地变量，可以被任务的业务逻辑访问
-- **Flink 会进行状态管理，包括状态一致性、故障处理以及高效存储和访问，以便于开发人员可以专注于应用程序的逻辑**
++ 由一个任务维护，并且用来计算某个结果的所有数据，都属于这个任务的状态
++ 可以认为任务状态就是一个本地变量，可以被任务的业务逻辑访问
++ **Flink 会进行状态管理，包括状态一致性、故障处理以及高效存储和访问，以便于开发人员可以专注于应用程序的逻辑**
 
 ---
 
-- **在Flink中，状态始终与特定算子相关联**
-- 为了使运行时的Flink了解算子的状态，算子需要预先注册其状态
++ **在Flink中，状态始终与特定算子相关联**
++ 为了使运行时的Flink了解算子的状态，算子需要预先注册其状态
 
 **总的来说，有两种类型的状态：**
 
@@ -3848,8 +3850,8 @@ minTemp:3> SensorReading{id='sensor_6', timestamp=1547718201, temperature=15.4}
 
 ### 算子状态数据结构
 
-+ 列表状态(List state) 
-  +  将状态表示为一组数据的列表
++ 列表状态(List state)
+  + 将状态表示为一组数据的列表
 
 + 联合列表状态(Union list state)
   + 也将状态表示未数据的列表。它与常规列表状态的区别在于，在发生故障时，或者从保存点(savepoint)启动应用程序时如何恢复
@@ -4324,26 +4326,26 @@ jobmanager.execution.failover-strategy: region
 
 # 9. ProcessFunction API(底层API)
 
-​	我们之前学习的**转换算子**是无法访问事件的<u>时间戳信息和水位线信息</u>的。而这在一些应用场景下，极为重要。例如MapFunction这样的map转换算子就无法访问时间戳或者当前事件的事件时间。
+​ 我们之前学习的**转换算子**是无法访问事件的<u>时间戳信息和水位线信息</u>的。而这在一些应用场景下，极为重要。例如MapFunction这样的map转换算子就无法访问时间戳或者当前事件的事件时间。
 
-​	基于此，DataStream API提供了一系列的Low-Level转换算子。可以**访问时间戳**、**watermark**以及**注册定时事件**。还可以输出**特定的一些事件**，例如超时事件等。<u>Process Function用来构建事件驱动的应用以及实现自定义的业务逻辑(使用之前的window函数和转换算子无法实现)。例如，FlinkSQL就是使用Process Function实现的</u>。
+​ 基于此，DataStream API提供了一系列的Low-Level转换算子。可以**访问时间戳**、**watermark**以及**注册定时事件**。还可以输出**特定的一些事件**，例如超时事件等。<u>Process Function用来构建事件驱动的应用以及实现自定义的业务逻辑(使用之前的window函数和转换算子无法实现)。例如，FlinkSQL就是使用Process Function实现的</u>。
 
 Flink提供了8个Process Function：
 
-- ProcessFunction
-- KeyedProcessFunction
-- CoProcessFunction
-- ProcessJoinFunction
-- BroadcastProcessFunction
-- KeyedBroadcastProcessFunction
-- ProcessWindowFunction
-- ProcessAllWindowFunction
++ ProcessFunction
++ KeyedProcessFunction
++ CoProcessFunction
++ ProcessJoinFunction
++ BroadcastProcessFunction
++ KeyedBroadcastProcessFunction
++ ProcessWindowFunction
++ ProcessAllWindowFunction
 
 ## 9.1 KeyedProcessFunction
 
-​	这个是相对比较常用的ProcessFunction，根据名字就可以知道是用在keyedStream上的。
+​ 这个是相对比较常用的ProcessFunction，根据名字就可以知道是用在keyedStream上的。
 
-​	KeyedProcessFunction用来操作KeyedStream。KeyedProcessFunction会处理流的每一个元素，输出为0个、1个或者多个元素。所有的Process Function都继承自RichFunction接口，所以都有`open()`、`close()`和`getRuntimeContext()`等方法。而`KeyedProcessFunction<K, I, O>`还额外提供了两个方法:
+​ KeyedProcessFunction用来操作KeyedStream。KeyedProcessFunction会处理流的每一个元素，输出为0个、1个或者多个元素。所有的Process Function都继承自RichFunction接口，所以都有`open()`、`close()`和`getRuntimeContext()`等方法。而`KeyedProcessFunction<K, I, O>`还额外提供了两个方法:
 
 + `processElement(I value, Context ctx, Collector<O> out)`，流中的每一个元素都会调用这个方法，调用结果将会放在Collector数据类型中输出。Context可以访问元素的时间戳，元素的 key ，以及TimerService 时间服务。 Context 还可以将结果输出到别的流(side outputs)。
 + `onTimer(long timestamp, OnTimerContext ctx, Collector<O> out)`，是一个回调函数。当之前注册的定时器触发时调用。参数timestamp 为定时器所设定的触发的时间戳。Collector 为输出结果的集合。OnTimerContext和processElement的Context 参数一样，提供了上下文的一些信息，例如定时器触发的时间信息(事件时间或者处理时间)。
@@ -4457,7 +4459,7 @@ sensor_1,1547718207,36.3
 
 ## 9.2 TimerService和定时器(Timers)
 
-​	Context 和OnTimerContext 所持有的TimerService 对象拥有以下方法：
+​ Context 和OnTimerContext 所持有的TimerService 对象拥有以下方法：
 
 + `long currentProcessingTime()` 返回当前处理时间
 
@@ -4471,7 +4473,7 @@ sensor_1,1547718207,36.3
 
 + `void deleteEventTimeTimer(long timestamp)` 删除之前注册的事件时间定时器，如果没有此时间戳的定时器，则不执行。
 
-​	**当定时器timer 触发时，会执行回调函数onTimer()。注意定时器timer 只能在keyed streams 上面使用。**
+​ **当定时器timer 触发时，会执行回调函数onTimer()。注意定时器timer 只能在keyed streams 上面使用。**
 
 ### 测试代码
 
@@ -4812,13 +4814,13 @@ sensor_1,1547718207,36.3
 + 数据源将它们的状态写入检查点，并发出一个检查点barrier
 + 状态后端在状态存入检查点之后，会返回通知给source任务，source任务就会向JobManager确认检查点完成
 
-​	*上图，在Source端接受到barrier后，将自己此身的3 和 4 的数据的状态写入检查点，且向JobManager发送checkpoint成功的消息，然后向下游分别发出一个检查点 barrier*
+​ *上图，在Source端接受到barrier后，将自己此身的3 和 4 的数据的状态写入检查点，且向JobManager发送checkpoint成功的消息，然后向下游分别发出一个检查点 barrier*
 
-​	*可以看出在Source接受barrier时，数据流也在不断的处理，不会进行中断*
+​ *可以看出在Source接受barrier时，数据流也在不断的处理，不会进行中断*
 
-​	*此时的偶数流已经处理完`蓝2`变成了4，但是还没处理到`黄4`，只是下游sink发送了一个数据4，而奇数流已经处理完`蓝3`变成了8（黄1+蓝1+黄3+蓝3），并向下游sink发送了8*
+​ *此时的偶数流已经处理完`蓝2`变成了4，但是还没处理到`黄4`，只是下游sink发送了一个数据4，而奇数流已经处理完`蓝3`变成了8（黄1+蓝1+黄3+蓝3），并向下游sink发送了8*
 
-​	*此时检查点barrier都还未到Sum_odd奇数流和Sum_even偶数流*
+​ *此时检查点barrier都还未到Sum_odd奇数流和Sum_even偶数流*
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200529225235834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
@@ -4826,17 +4828,17 @@ sensor_1,1547718207,36.3
 + **对于barrier已经达到的分区，继续到达的数据会被缓存**
 + **而barrier尚未到达的分区，数据会被正常处理**
 
-​	*此时蓝色流的barrier先一步抵达了偶数流，黄色的barrier还未到，但是因为数据的不中断一直处理，此时的先到的蓝色的barrier会将此时的偶数流的数据4进行缓存处理，流接着处理接下来的数据等待着黄色的barrier的到来，而黄色barrier之前的数据将会对缓存的数据相加*
+​ *此时蓝色流的barrier先一步抵达了偶数流，黄色的barrier还未到，但是因为数据的不中断一直处理，此时的先到的蓝色的barrier会将此时的偶数流的数据4进行缓存处理，流接着处理接下来的数据等待着黄色的barrier的到来，而黄色barrier之前的数据将会对缓存的数据相加*
 
-​	*这次处理的总结：**分界线对齐**：**barrier 向下游传递，sum 任务会等待所有输入分区的 barrier 到达，对于barrier已经到达的分区，继续到达的数据会被缓存。而barrier尚未到达的分区，数据会被正常处理***
+​ *这次处理的总结：**分界线对齐**：**barrier 向下游传递，sum 任务会等待所有输入分区的 barrier 到达，对于barrier已经到达的分区，继续到达的数据会被缓存。而barrier尚未到达的分区，数据会被正常处理***
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200529225656902.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
 + **当收到所有输入分区的 barrier 时，任务就将其状态保存到状态后端的检查点中，然后将 barrier 继续向下游转发**
 
-​	*当蓝色的barrier和黄色的barrier(所有分区的)都到达后，进行状态保存到远程仓库，**然后对JobManager发送消息，说自己的检查点保存完毕了***
+​ *当蓝色的barrier和黄色的barrier(所有分区的)都到达后，进行状态保存到远程仓库，**然后对JobManager发送消息，说自己的检查点保存完毕了***
 
-​	*此时的偶数流和奇数流都为8*
+​ *此时的偶数流和奇数流都为8*
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200529230413317.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
@@ -4943,7 +4945,7 @@ sensor_1,1547718207,36.3
 
 ### 10.6.2 分类
 
-​	**Flink的一个重大价值在于，它既保证了exactly-once，也具有低延迟和高吞吐的处理能力。**
+​ **Flink的一个重大价值在于，它既保证了exactly-once，也具有低延迟和高吞吐的处理能力。**
 
 1. AT-MOST-ONCE（最多一次）
    当任务故障时，最简单的做法是什么都不干，既不恢复丢失的状态，也不重播丢失的数据。At-most-once 语义的含义是最多处理一次事件。
@@ -5081,7 +5083,7 @@ sensor_1,1547718207,36.3
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200531165328668.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-###  使用样例
+### 使用样例
 
 + 导入pom依赖，1.11.X之后，推荐使用blink版本
 
@@ -5268,10 +5270,10 @@ public class TableTest2_CommonApi {
 
   ```java
   tableEnv
-    .connect(...)	//	定义表的数据来源，和外部系统建立连接
-    .withFormat(...)	//	定义数据格式化方法
-    .withSchema(...)	//	定义表结构
-    .createTemporaryTable("MyTable");	//	创建临时表
+    .connect(...) // 定义表的数据来源，和外部系统建立连接
+    .withFormat(...) // 定义数据格式化方法
+    .withSchema(...) // 定义表结构
+    .createTemporaryTable("MyTable"); // 创建临时表
   ```
 
 ### 11.3.3 创建TableEnvironment
@@ -5506,7 +5508,7 @@ public class TableTest2_CommonApi {
 
 > [flink Sql 1.11 executeSql报No operators defined in streaming topology. Cannot generate StreamGraph.](https://blog.csdn.net/qq_26502245/article/details/107376528)
 
-​	写入到文件有局限，只能是批处理，且只能是追加写，不能是更新式的随机写。
+​ 写入到文件有局限，只能是批处理，且只能是追加写，不能是更新式的随机写。
 
 + java代码
 
@@ -5604,108 +5606,108 @@ public class TableTest2_CommonApi {
 
   ```shell
   Exception in thread "main" org.apache.flink.runtime.client.JobExecutionException: Job execution failed.
-  	at org.apache.flink.runtime.jobmaster.JobResult.toJobExecutionResult(JobResult.java:144)
-  	at org.apache.flink.runtime.minicluster.MiniClusterJobClient.lambda$getJobExecutionResult$2(MiniClusterJobClient.java:117)
-  	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:616)
-  	at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:591)
-  	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:488)
-  	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1975)
-  	at org.apache.flink.runtime.rpc.akka.AkkaInvocationHandler.lambda$invokeRpc$0(AkkaInvocationHandler.java:238)
-  	at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:774)
-  	at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:750)
-  	at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:488)
-  	at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1975)
-  	at org.apache.flink.runtime.concurrent.FutureUtils$1.onComplete(FutureUtils.java:1046)
-  	at akka.dispatch.OnComplete.internal(Future.scala:264)
-  	at akka.dispatch.OnComplete.internal(Future.scala:261)
-  	at akka.dispatch.japi$CallbackBridge.apply(Future.scala:191)
-  	at akka.dispatch.japi$CallbackBridge.apply(Future.scala:188)
-  	at scala.concurrent.impl.CallbackRunnable.run$$$capture(Promise.scala:60)
-  	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala)
-  	at org.apache.flink.runtime.concurrent.Executors$DirectExecutionContext.execute(Executors.java:73)
-  	at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:68)
-  	at scala.concurrent.impl.Promise$DefaultPromise.$anonfun$tryComplete$1(Promise.scala:284)
-  	at scala.concurrent.impl.Promise$DefaultPromise.$anonfun$tryComplete$1$adapted(Promise.scala:284)
-  	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:284)
-  	at akka.pattern.PromiseActorRef.$bang(AskSupport.scala:573)
-  	at akka.pattern.PipeToSupport$PipeableFuture$$anonfun$pipeTo$1.applyOrElse(PipeToSupport.scala:22)
-  	at akka.pattern.PipeToSupport$PipeableFuture$$anonfun$pipeTo$1.applyOrElse(PipeToSupport.scala:21)
-  	at scala.concurrent.Future.$anonfun$andThen$1(Future.scala:532)
-  	at scala.concurrent.impl.Promise.liftedTree1$1(Promise.scala:29)
-  	at scala.concurrent.impl.Promise.$anonfun$transform$1(Promise.scala:29)
-  	at scala.concurrent.impl.CallbackRunnable.run$$$capture(Promise.scala:60)
-  	at scala.concurrent.impl.CallbackRunnable.run(Promise.scala)
-  	at akka.dispatch.BatchingExecutor$AbstractBatch.processBatch(BatchingExecutor.scala:55)
-  	at akka.dispatch.BatchingExecutor$BlockableBatch.$anonfun$run$1(BatchingExecutor.scala:91)
-  	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:12)
-  	at scala.concurrent.BlockContext$.withBlockContext(BlockContext.scala:81)
-  	at akka.dispatch.BatchingExecutor$BlockableBatch.run(BatchingExecutor.scala:91)
-  	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40)
-  	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(ForkJoinExecutorConfigurator.scala:44)
-  	at akka.dispatch.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)
-  	at akka.dispatch.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)
-  	at akka.dispatch.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)
-  	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
+   at org.apache.flink.runtime.jobmaster.JobResult.toJobExecutionResult(JobResult.java:144)
+   at org.apache.flink.runtime.minicluster.MiniClusterJobClient.lambda$getJobExecutionResult$2(MiniClusterJobClient.java:117)
+   at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:616)
+   at java.util.concurrent.CompletableFuture$UniApply.tryFire(CompletableFuture.java:591)
+   at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:488)
+   at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1975)
+   at org.apache.flink.runtime.rpc.akka.AkkaInvocationHandler.lambda$invokeRpc$0(AkkaInvocationHandler.java:238)
+   at java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:774)
+   at java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:750)
+   at java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:488)
+   at java.util.concurrent.CompletableFuture.complete(CompletableFuture.java:1975)
+   at org.apache.flink.runtime.concurrent.FutureUtils$1.onComplete(FutureUtils.java:1046)
+   at akka.dispatch.OnComplete.internal(Future.scala:264)
+   at akka.dispatch.OnComplete.internal(Future.scala:261)
+   at akka.dispatch.japi$CallbackBridge.apply(Future.scala:191)
+   at akka.dispatch.japi$CallbackBridge.apply(Future.scala:188)
+   at scala.concurrent.impl.CallbackRunnable.run$$$capture(Promise.scala:60)
+   at scala.concurrent.impl.CallbackRunnable.run(Promise.scala)
+   at org.apache.flink.runtime.concurrent.Executors$DirectExecutionContext.execute(Executors.java:73)
+   at scala.concurrent.impl.CallbackRunnable.executeWithValue(Promise.scala:68)
+   at scala.concurrent.impl.Promise$DefaultPromise.$anonfun$tryComplete$1(Promise.scala:284)
+   at scala.concurrent.impl.Promise$DefaultPromise.$anonfun$tryComplete$1$adapted(Promise.scala:284)
+   at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:284)
+   at akka.pattern.PromiseActorRef.$bang(AskSupport.scala:573)
+   at akka.pattern.PipeToSupport$PipeableFuture$$anonfun$pipeTo$1.applyOrElse(PipeToSupport.scala:22)
+   at akka.pattern.PipeToSupport$PipeableFuture$$anonfun$pipeTo$1.applyOrElse(PipeToSupport.scala:21)
+   at scala.concurrent.Future.$anonfun$andThen$1(Future.scala:532)
+   at scala.concurrent.impl.Promise.liftedTree1$1(Promise.scala:29)
+   at scala.concurrent.impl.Promise.$anonfun$transform$1(Promise.scala:29)
+   at scala.concurrent.impl.CallbackRunnable.run$$$capture(Promise.scala:60)
+   at scala.concurrent.impl.CallbackRunnable.run(Promise.scala)
+   at akka.dispatch.BatchingExecutor$AbstractBatch.processBatch(BatchingExecutor.scala:55)
+   at akka.dispatch.BatchingExecutor$BlockableBatch.$anonfun$run$1(BatchingExecutor.scala:91)
+   at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:12)
+   at scala.concurrent.BlockContext$.withBlockContext(BlockContext.scala:81)
+   at akka.dispatch.BatchingExecutor$BlockableBatch.run(BatchingExecutor.scala:91)
+   at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40)
+   at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(ForkJoinExecutorConfigurator.scala:44)
+   at akka.dispatch.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)
+   at akka.dispatch.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)
+   at akka.dispatch.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)
+   at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)
   Caused by: org.apache.flink.runtime.JobException: Recovery is suppressed by NoRestartBackoffTimeStrategy
-  	at org.apache.flink.runtime.executiongraph.failover.flip1.ExecutionFailureHandler.handleFailure(ExecutionFailureHandler.java:118)
-  	at org.apache.flink.runtime.executiongraph.failover.flip1.ExecutionFailureHandler.getFailureHandlingResult(ExecutionFailureHandler.java:80)
-  	at org.apache.flink.runtime.scheduler.DefaultScheduler.handleTaskFailure(DefaultScheduler.java:233)
-  	at org.apache.flink.runtime.scheduler.DefaultScheduler.maybeHandleTaskFailure(DefaultScheduler.java:224)
-  	at org.apache.flink.runtime.scheduler.DefaultScheduler.updateTaskExecutionStateInternal(DefaultScheduler.java:215)
-  	at org.apache.flink.runtime.scheduler.SchedulerBase.updateTaskExecutionState(SchedulerBase.java:665)
-  	at org.apache.flink.runtime.scheduler.SchedulerNG.updateTaskExecutionState(SchedulerNG.java:89)
-  	at org.apache.flink.runtime.jobmaster.JobMaster.updateTaskExecutionState(JobMaster.java:447)
-  	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-  	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-  	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-  	at java.lang.reflect.Method.invoke(Method.java:498)
-  	at org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleRpcInvocation(AkkaRpcActor.java:306)
-  	at org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleRpcMessage(AkkaRpcActor.java:213)
-  	at org.apache.flink.runtime.rpc.akka.FencedAkkaRpcActor.handleRpcMessage(FencedAkkaRpcActor.java:77)
-  	at org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleMessage(AkkaRpcActor.java:159)
-  	at akka.japi.pf.UnitCaseStatement.apply(CaseStatements.scala:26)
-  	at akka.japi.pf.UnitCaseStatement.apply(CaseStatements.scala:21)
-  	at scala.PartialFunction.applyOrElse(PartialFunction.scala:123)
-  	at scala.PartialFunction.applyOrElse$(PartialFunction.scala:122)
-  	at akka.japi.pf.UnitCaseStatement.applyOrElse(CaseStatements.scala:21)
-  	at scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:171)
-  	at scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:172)
-  	at scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:172)
-  	at akka.actor.Actor.aroundReceive(Actor.scala:517)
-  	at akka.actor.Actor.aroundReceive$(Actor.scala:515)
-  	at akka.actor.AbstractActor.aroundReceive(AbstractActor.scala:225)
-  	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:592)
-  	at akka.actor.ActorCell.invoke(ActorCell.scala:561)
-  	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:258)
-  	at akka.dispatch.Mailbox.run(Mailbox.scala:225)
-  	at akka.dispatch.Mailbox.exec(Mailbox.scala:235)
-  	... 4 more
+   at org.apache.flink.runtime.executiongraph.failover.flip1.ExecutionFailureHandler.handleFailure(ExecutionFailureHandler.java:118)
+   at org.apache.flink.runtime.executiongraph.failover.flip1.ExecutionFailureHandler.getFailureHandlingResult(ExecutionFailureHandler.java:80)
+   at org.apache.flink.runtime.scheduler.DefaultScheduler.handleTaskFailure(DefaultScheduler.java:233)
+   at org.apache.flink.runtime.scheduler.DefaultScheduler.maybeHandleTaskFailure(DefaultScheduler.java:224)
+   at org.apache.flink.runtime.scheduler.DefaultScheduler.updateTaskExecutionStateInternal(DefaultScheduler.java:215)
+   at org.apache.flink.runtime.scheduler.SchedulerBase.updateTaskExecutionState(SchedulerBase.java:665)
+   at org.apache.flink.runtime.scheduler.SchedulerNG.updateTaskExecutionState(SchedulerNG.java:89)
+   at org.apache.flink.runtime.jobmaster.JobMaster.updateTaskExecutionState(JobMaster.java:447)
+   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+   at java.lang.reflect.Method.invoke(Method.java:498)
+   at org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleRpcInvocation(AkkaRpcActor.java:306)
+   at org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleRpcMessage(AkkaRpcActor.java:213)
+   at org.apache.flink.runtime.rpc.akka.FencedAkkaRpcActor.handleRpcMessage(FencedAkkaRpcActor.java:77)
+   at org.apache.flink.runtime.rpc.akka.AkkaRpcActor.handleMessage(AkkaRpcActor.java:159)
+   at akka.japi.pf.UnitCaseStatement.apply(CaseStatements.scala:26)
+   at akka.japi.pf.UnitCaseStatement.apply(CaseStatements.scala:21)
+   at scala.PartialFunction.applyOrElse(PartialFunction.scala:123)
+   at scala.PartialFunction.applyOrElse$(PartialFunction.scala:122)
+   at akka.japi.pf.UnitCaseStatement.applyOrElse(CaseStatements.scala:21)
+   at scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:171)
+   at scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:172)
+   at scala.PartialFunction$OrElse.applyOrElse(PartialFunction.scala:172)
+   at akka.actor.Actor.aroundReceive(Actor.scala:517)
+   at akka.actor.Actor.aroundReceive$(Actor.scala:515)
+   at akka.actor.AbstractActor.aroundReceive(AbstractActor.scala:225)
+   at akka.actor.ActorCell.receiveMessage(ActorCell.scala:592)
+   at akka.actor.ActorCell.invoke(ActorCell.scala:561)
+   at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:258)
+   at akka.dispatch.Mailbox.run(Mailbox.scala:225)
+   at akka.dispatch.Mailbox.exec(Mailbox.scala:235)
+   ... 4 more
   Caused by: java.io.IOException: File or directory /Users/ashiamd/mydocs/docs/study/javadocument/javadocument/IDEA_project/Flink_Tutorial/src/main/resources/out.txt already exists. Existing files and directories are not overwritten in NO_OVERWRITE mode. Use OVERWRITE mode to overwrite existing files and directories.
-  	at org.apache.flink.core.fs.FileSystem.initOutPathLocalFS(FileSystem.java:874)
-  	at org.apache.flink.core.fs.SafetyNetWrapperFileSystem.initOutPathLocalFS(SafetyNetWrapperFileSystem.java:142)
-  	at org.apache.flink.api.common.io.FileOutputFormat.open(FileOutputFormat.java:234)
-  	at org.apache.flink.api.java.io.TextOutputFormat.open(TextOutputFormat.java:92)
-  	at org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction.open(OutputFormatSinkFunction.java:65)
-  	at org.apache.flink.api.common.functions.util.FunctionUtils.openFunction(FunctionUtils.java:34)
-  	at org.apache.flink.streaming.api.operators.AbstractUdfStreamOperator.open(AbstractUdfStreamOperator.java:102)
-  	at org.apache.flink.streaming.api.operators.StreamSink.open(StreamSink.java:46)
-  	at org.apache.flink.streaming.runtime.tasks.OperatorChain.initializeStateAndOpenOperators(OperatorChain.java:426)
-  	at org.apache.flink.streaming.runtime.tasks.StreamTask.lambda$beforeInvoke$2(StreamTask.java:535)
-  	at org.apache.flink.streaming.runtime.tasks.StreamTaskActionExecutor$1.runThrowing(StreamTaskActionExecutor.java:50)
-  	at org.apache.flink.streaming.runtime.tasks.StreamTask.beforeInvoke(StreamTask.java:525)
-  	at org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:565)
-  	at org.apache.flink.runtime.taskmanager.Task.doRun(Task.java:755)
-  	at org.apache.flink.runtime.taskmanager.Task.run(Task.java:570)
-  	at java.lang.Thread.run(Thread.java:748)
-  	Suppressed: java.lang.NullPointerException
-  		at org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator.lambda$cleanUp$1(ContinuousFileReaderOperator.java:499)
-  		at org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator.cleanUp(ContinuousFileReaderOperator.java:512)
-  		at org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator.dispose(ContinuousFileReaderOperator.java:441)
-  		at org.apache.flink.streaming.runtime.tasks.StreamTask.disposeAllOperators(StreamTask.java:783)
-  		at org.apache.flink.streaming.runtime.tasks.StreamTask.runAndSuppressThrowable(StreamTask.java:762)
-  		at org.apache.flink.streaming.runtime.tasks.StreamTask.cleanUpInvoke(StreamTask.java:681)
-  		at org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:585)
-  		... 3 more
+   at org.apache.flink.core.fs.FileSystem.initOutPathLocalFS(FileSystem.java:874)
+   at org.apache.flink.core.fs.SafetyNetWrapperFileSystem.initOutPathLocalFS(SafetyNetWrapperFileSystem.java:142)
+   at org.apache.flink.api.common.io.FileOutputFormat.open(FileOutputFormat.java:234)
+   at org.apache.flink.api.java.io.TextOutputFormat.open(TextOutputFormat.java:92)
+   at org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction.open(OutputFormatSinkFunction.java:65)
+   at org.apache.flink.api.common.functions.util.FunctionUtils.openFunction(FunctionUtils.java:34)
+   at org.apache.flink.streaming.api.operators.AbstractUdfStreamOperator.open(AbstractUdfStreamOperator.java:102)
+   at org.apache.flink.streaming.api.operators.StreamSink.open(StreamSink.java:46)
+   at org.apache.flink.streaming.runtime.tasks.OperatorChain.initializeStateAndOpenOperators(OperatorChain.java:426)
+   at org.apache.flink.streaming.runtime.tasks.StreamTask.lambda$beforeInvoke$2(StreamTask.java:535)
+   at org.apache.flink.streaming.runtime.tasks.StreamTaskActionExecutor$1.runThrowing(StreamTaskActionExecutor.java:50)
+   at org.apache.flink.streaming.runtime.tasks.StreamTask.beforeInvoke(StreamTask.java:525)
+   at org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:565)
+   at org.apache.flink.runtime.taskmanager.Task.doRun(Task.java:755)
+   at org.apache.flink.runtime.taskmanager.Task.run(Task.java:570)
+   at java.lang.Thread.run(Thread.java:748)
+   Suppressed: java.lang.NullPointerException
+    at org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator.lambda$cleanUp$1(ContinuousFileReaderOperator.java:499)
+    at org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator.cleanUp(ContinuousFileReaderOperator.java:512)
+    at org.apache.flink.streaming.api.functions.source.ContinuousFileReaderOperator.dispose(ContinuousFileReaderOperator.java:441)
+    at org.apache.flink.streaming.runtime.tasks.StreamTask.disposeAllOperators(StreamTask.java:783)
+    at org.apache.flink.streaming.runtime.tasks.StreamTask.runAndSuppressThrowable(StreamTask.java:762)
+    at org.apache.flink.streaming.runtime.tasks.StreamTask.cleanUpInvoke(StreamTask.java:681)
+    at org.apache.flink.streaming.runtime.tasks.StreamTask.invoke(StreamTask.java:585)
+    ... 3 more
   ```
 
 #### 读写Kafka
@@ -5789,21 +5791,21 @@ Kafka作为消息队列，和文件系统类似的，只能往里追加数据，
 + 启动kafka目录里自带的zookeeper
 
   ```shell
-  $ bin/zookeeper-server-start.sh config/zookeeper.properties
+  bin/zookeeper-server-start.sh config/zookeeper.properties
   ```
 
 + 启动kafka服务
 
   ```shell
-  $ bin/kafka-server-start.sh config/server.properties
+  bin/kafka-server-start.sh config/server.properties
   ```
 
 + 新建kafka生产者和消费者
 
   ```shell
-  $ bin/kafka-console-producer.sh --broker-list localhost:9092  --topic sensor
+  bin/kafka-console-producer.sh --broker-list localhost:9092  --topic sensor
   
-  $ bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic sinktest
+  bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic sinktest
   ```
 
 + 启动Flink程序，在kafka生产者console中输入数据，查看输出
@@ -5894,7 +5896,7 @@ Kafka作为消息队列，和文件系统类似的，只能往里追加数据，
     " 'connector.driver' = 'com.mysql.jdbc.Driver', " +
     " 'connector.username' = 'root', " +
     " 'connector.password' = '123456' )";
-  tableEnv.sqlUpdate(sinkDDL);	// 执行DDL创建表
+  tableEnv.sqlUpdate(sinkDDL); // 执行DDL创建表
   aggResultSqlTable.insertInto("jdbcOutputTable");
   ```
 
@@ -5980,9 +5982,9 @@ Kafka作为消息队列，和文件系统类似的，只能往里追加数据，
 
 > [Flink- 将表转换成DataStream | 查看执行计划 | 流处理和关系代数的区别 | 动态表 | 流式持续查询的过程 | 将流转换成动态表 | 持续查询 | 将动态表转换成 DS](https://blog.csdn.net/qq_40180229/article/details/106479537)
 
-​	Table API和SQL，本质上还是基于关系型表的操作方式；而关系型表、关系代数，以及SQL本身，一般是有界的，更适合批处理的场景。这就导致在进行流处理的过程中，理解会稍微复杂一些，需要引入一些特殊概念。
+​ Table API和SQL，本质上还是基于关系型表的操作方式；而关系型表、关系代数，以及SQL本身，一般是有界的，更适合批处理的场景。这就导致在进行流处理的过程中，理解会稍微复杂一些，需要引入一些特殊概念。
 
-​	可以看到，其实**关系代数（主要就是指关系型数据库中的表）和SQL，主要就是针对批处理的，这和流处理有天生的隔阂。**
+​ 可以看到，其实**关系代数（主要就是指关系型数据库中的表）和SQL，主要就是针对批处理的，这和流处理有天生的隔阂。**
 
 |                           | 关系代数(表)/SQL           | 流处理                                       |
 | ------------------------- | -------------------------- | -------------------------------------------- |
@@ -5992,7 +5994,7 @@ Kafka作为消息队列，和文件系统类似的，只能往里追加数据，
 
 ### 11.6.1 动态表(Dynamic Tables)
 
-​	我们可以**随着新数据的到来，不停地在之前的基础上更新结果**。这样得到的表，在Flink Table API概念里，就叫做“动态表”（Dynamic Tables）。
+​ 我们可以**随着新数据的到来，不停地在之前的基础上更新结果**。这样得到的表，在Flink Table API概念里，就叫做“动态表”（Dynamic Tables）。
 
 + 动态表是 Flink 对流数据的 Table API 和 SQL 支持的核心概念
 + 与表示批处理数据的静态表不同，动态表是随时间变化的
@@ -6032,7 +6034,7 @@ Kafka作为消息队列，和文件系统类似的，只能往里追加数据，
 
   *在任何时间点，连续查询的结果在语义上，等同于在输入表的快照上，以批处理模式执行的同一查询的结果。*
 
-​	下图为一个点击事件流的持续查询，是一个分组聚合做count统计的查询。
+​ 下图为一个点击事件流的持续查询，是一个分组聚合做count统计的查询。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200601191112183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
@@ -7367,7 +7369,7 @@ case class MyAggTabTemp() extends TableAggregateFunction[(Double, Int), AggTabTe
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200602183856808.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-+  **进行统计整理 —— keyBy(“windowEnd”)**
++ **进行统计整理 —— keyBy(“windowEnd”)**
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2020060218391775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
@@ -7733,19 +7735,19 @@ case class MyAggTabTemp() extends TableAggregateFunction[(Double, Int), AggTabTe
 + 启动本地kafka里自带的zookeeper
 
   ```shell
-  $ bin/zookeeper-server-start.sh config/zookeeper.properties
+  bin/zookeeper-server-start.sh config/zookeeper.properties
   ```
 
 + 启动kafka
 
   ```shell
-  $ bin/kafka-server-start.sh config/server.properties
+  bin/kafka-server-start.sh config/server.properties
   ```
 
 + 启动kafka生产者console
 
   ```shell
-  $ bin/kafka-console-producer.sh --broker-list localhost:9092  --topic hotitems
+  bin/kafka-console-producer.sh --broker-list localhost:9092  --topic hotitems
   ```
 
 + 运行Flink程序，输入数据（kafka-console-producer）
@@ -9327,7 +9329,6 @@ case class MyAggTabTemp() extends TableAggregateFunction[(Double, Int), AggTabTe
     }
   }
   ```
-
 
 #### 代码2-具体实现
 
@@ -11262,11 +11263,11 @@ ProcessFunction用来处理每个独立且靠状态就能联系的事件，灵�
 
 + 目标：从有序的简单事件流中发现一些高阶特征
 
-- 输入：一个或多个由简单事件构成的事件流
++ 输入：一个或多个由简单事件构成的事件流
 
-- 处理：识别简单事件之间的内在联系，多个符合一定规则的简单事件构成复杂事件
++ 处理：识别简单事件之间的内在联系，多个符合一定规则的简单事件构成复杂事件
 
-- 输出：满足规则的复杂事件
++ 输出：满足规则的复杂事件
 
 ## 15.2 Pattern API
 
@@ -11395,13 +11396,13 @@ ProcessFunction用来处理每个独立且靠状态就能联系的事件，灵�
 
 + 需要注意：
 
-  +  **所有模式序列必须以`.begin()`开始**
+  + **所有模式序列必须以`.begin()`开始**
 
-  +  **模式序列不能以`.notFollowedBy()`结束**
+  + **模式序列不能以`.notFollowedBy()`结束**
 
-  +  **"not "类型的模式不能被optional 所修饰**
+  + **"not "类型的模式不能被optional 所修饰**
 
-  +  此外,还可以为模式指定事件约束，用来<u>要求在多长时间内匹配有效</u>: 
+  + 此外,还可以为模式指定事件约束，用来<u>要求在多长时间内匹配有效</u>:
 
     `next.within(Time.seconds(10))`
 
@@ -11411,9 +11412,9 @@ ProcessFunction用来处理每个独立且靠状态就能联系的事件，灵�
 
 ## 15.3 模式的检测
 
-- 指定要查找的模式序列后，就可以将其应用于输入流以检测潜在匹配
++ 指定要查找的模式序列后，就可以将其应用于输入流以检测潜在匹配
 
-- 调用`CEP.pattern()`，给定输入流和模式，就能得到一个PatternStream
++ 调用`CEP.pattern()`，给定输入流和模式，就能得到一个PatternStream
 
   ```java
   DataStream<Event> input = ...
@@ -11424,11 +11425,11 @@ ProcessFunction用来处理每个独立且靠状态就能联系的事件，灵�
 
 ## 15.4 匹配事件的提取
 
-- 创建PatternStrean之后，就可以应用select或者flatselect方法，从检测到的事件序列中提取事件了
++ 创建PatternStrean之后，就可以应用select或者flatselect方法，从检测到的事件序列中提取事件了
 
-- `select()`方法需要输入一个select function作为参数,每个成功匹配的事件序列都会调用它
++ `select()`方法需要输入一个select function作为参数,每个成功匹配的事件序列都会调用它
 
-- `select()` 以一个Map<String，List<IN]>> 来接收匹配到的事件序列，其中Key就是每个模式的名称，而value就是所有接收到的事件的List类型
++ `select()` 以一个Map<String，List<IN]>> 来接收匹配到的事件序列，其中Key就是每个模式的名称，而value就是所有接收到的事件的List类型
 
   ```java
   public OUT select(Map<String, List<IN>> pattern) throws Exception {
@@ -11457,6 +11458,3 @@ ProcessFunction用来处理每个独立且靠状态就能联系的事件，灵�
   DataStream<TimeoutEvent> timeoutFlatResult = 
     flatResult.getSideOutput(outputTag);
   ```
-
-
-
