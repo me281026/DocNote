@@ -6299,7 +6299,7 @@ public class TableTest5_TimeAndWindow {
 
 输出如下：
 
-*注：这里最后一列rt里显示的是EventTime，而不是Processing Time*
+*注：这里最后一列rt里显示的是EventTime，而不是Processing Time.;*
 
 ```shell
 root
