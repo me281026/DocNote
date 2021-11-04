@@ -908,21 +908,21 @@ docker-compose exec kafka kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 --topic output
 ```
 
-## Time to Play!
+## Time to Play
 
-​	Now that you learned how to interact with Flink and the Docker containers, let’s have a look at some common operational tasks that you can try out on our playground. All of these tasks are independent of each other, i.e. you can perform them in any order. Most tasks can be executed via the [CLI](https://ci.apache.org/projects/flink/flink-docs-release-1.12/try-flink/flink-operations-playground.html#flink-cli) and the [REST API](https://ci.apache.org/projects/flink/flink-docs-release-1.12/try-flink/flink-operations-playground.html#flink-rest-api).
+​Now that you learned how to interact with Flink and the Docker containers, let’s have a look at some common operational tasks that you can try out on our playground. All of these tasks are independent of each other, i.e. you can perform them in any order. Most tasks can be executed via the [CLI](https://ci.apache.org/projects/flink/flink-docs-release-1.12/try-flink/flink-operations-playground.html#flink-cli) and the [REST API](https://ci.apache.org/projects/flink/flink-docs-release-1.12/try-flink/flink-operations-playground.html#flink-rest-api).
 
 ### Listing Running Jobs
 
-**Command**
+**Command:**
 
-```
+```shell
 docker-compose run --no-deps client flink list
 ```
 
-**Expected Output**
+**Expected Output:**
 
-```
+```log
 Waiting for response...
 ------------------ Running/Restarting Jobs -------------------
 16.07.2019 16:37:55 : <job-id> : Click Event Count (RUNNING)
@@ -942,7 +942,7 @@ As described [above](https://ci.apache.org/projects/flink/flink-docs-release-1.1
 
 For this, start reading from the *output* topic and leave this command running until after recovery (Step 3).
 
-```
+```shell
 docker-compose exec kafka kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 --topic output
 ```
@@ -951,7 +951,7 @@ docker-compose exec kafka kafka-console-consumer.sh \
 
 In order to simulate a partial failure you can kill a TaskManager. In a production setup, this could correspond to a loss of the TaskManager process, the TaskManager machine or simply a transient exception being thrown from the framework or user code (e.g. due to the temporary unavailability of an external resource).
 
-```
+```shell
 docker-compose kill taskmanager
 ```
 
@@ -969,7 +969,7 @@ In the meantime, the data generator keeps pushing `ClickEvent`s into the *input*
 
 Once you restart the TaskManager, it reconnects to the JobManager.
 
-```
+```shell
 docker-compose up -d taskmanager
 ```
 
@@ -989,7 +989,7 @@ Upgrading a Flink Job always involves two steps: First, the Flink Job is gracefu
 
 Before starting with the upgrade you might want to start tailing the *output* topic, in order to observe that no data is lost or corrupted in the course the upgrade.
 
-```
+```shell
 docker-compose exec kafka kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 --topic output
 ```
