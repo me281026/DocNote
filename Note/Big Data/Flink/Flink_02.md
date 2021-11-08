@@ -484,10 +484,9 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 1. 搭建*Kubernetes*集群（略）
 
 2. 配置各组件的*yaml*文件
+   1. 在k8s上构建Flink Session Cluster，需要将Flink集群的组件对应的docker镜像分别在k8s上启动，包括JobManager、TaskManager、JobManagerService三个镜像服务。每个镜像服务都可以从中央镜像仓库中获取。
 
-​ 在k8s上构建Flink Session Cluster，需要将Flink集群的组件对应的docker镜像分别在k8s上启动，包括JobManager、TaskManager、JobManagerService三个镜像服务。每个镜像服务都可以从中央镜像仓库中获取。
-
-3. 启动*Flink Session Cluster*
+3. 启动*Flink Session Cluster.*
 
    ```shell
    // 启动jobmanager-service 服务
@@ -611,7 +610,7 @@ eg：这里我配置文件设置`taskmanager.numberOfTaskSlots: 4`，实际Job�
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200524213557113.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwMTgwMjI5,size_16,color_FFFFFF,t_70)
 
-+ <u>Flink中每一个worker(TaskManager)都是一个**JVM**进程，它可能会在独立的线程上执行一个或多个subtask</u>。
++ <\u>Flink中每一个worker(TaskManager)都是一个**JVM**进程，它可能会在独立的线程上执行一个或多个subtask</u>。
 + 为了控制一个worker能接收多少个task，worker通过task slot来进行控制（一个worker至少有一个task slot）。
 
 **上图这个每个子任务各自占用一个slot，可以在代码中通过算子的`.slotSharingGroup("组名")`指定算子所在的Slot组名，默认每一个算子的SlotGroup和上一个算子相同，而默认的SlotGroup就是"default"**。
@@ -1421,7 +1420,7 @@ result> SensorReading{id='sensor_1', timestamp=1547718212, temperature=37.1}
 
 #### Split和Select
 
-**注：新版Flink已经不存在Split和Select这两个API了（至少Flink1.12.1没有！）**
+**注：新版Flink已经不存在Split和Select这两个API了（至少Flink1.12.1没有！）;**
 
 ##### Split
 
