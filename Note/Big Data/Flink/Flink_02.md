@@ -1513,11 +1513,12 @@ public class TransformTest4_MultipleStreams {
 输出结果如下：
 
 ```shell
+
 high> SensorReading{id='sensor_1', timestamp=1547718199, temperature=35.8}
 all > SensorReading{id='sensor_1', timestamp=1547718199, temperature=35.8}
 low > SensorReading{id='sensor_6', timestamp=1547718201, temperature=15.4}
 all > SensorReading{id='sensor_6', timestamp=1547718201, temperature=15.4}
-...
+
 ```
 
 #### Connect和CoMap
