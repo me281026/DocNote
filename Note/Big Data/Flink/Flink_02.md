@@ -1682,6 +1682,7 @@ public class TransformTest4_MultipleStreams {
 ```java
 DataStream<Integer> numberStream = env.fromElements(1, 2, 3, 4);
 numberStream.map(data -> data * 2);
+
 ```
 
 ### 5.4.2 Java和Scala元组(Tuples)
@@ -1689,7 +1690,7 @@ numberStream.map(data -> data * 2);
 java不像Scala天生支持元组Tuple类型，java的元组类型由Flink的包提供，默认提供Tuple0~Tuple25
 
 ```java
-DataStream<Tuple2<String, Integer>> personStream = env.fromElements( 
+DataStream<Tuple2<String, Integer>> personStream = env.fromElements(
   new Tuple2("Adam", 17), 
   new Tuple2("Sarah", 23) 
 ); 
