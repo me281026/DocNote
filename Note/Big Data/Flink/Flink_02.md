@@ -1359,7 +1359,7 @@ public class TransformTest3_Reduce {
         // 执行环境并行度设置1
         env.setParallelism(1);
 
-        DataStream<String> dataStream = env.readTextFile("/tmp/Flink_Tutorial/src/main/resources/sensor.txt");
+        DataStream<String> dataStream = env.readTextFile("/tmp/Flink_Tutorial/src/main/resources/0000.txt");
 
         DataStream<SensorReading> sensorStream = dataStream.map(line -> {
             String[] fields = line.split(",");
@@ -2848,7 +2848,7 @@ orangeStream
 + Flink提供了更加简单的`.timeWindow()`和`.countWindow()`方法，用于定义时间窗口和计数窗口。
 
 ```java
-DataStream<Tuple2<String,Double>> minTempPerWindowStream = 
+DataStream<Tuple2<String,Double>> minTempPerWindowStream =
   datastream
   .map(new MyMapper())
   .keyBy(data -> data.f0)
